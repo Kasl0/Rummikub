@@ -42,3 +42,7 @@ class Player:
         tile = self.board.take_tile_off(position)
         if tile is not None:
             self.rack.add_tile(tile)
+
+    def draw_starting_tiles(self):
+        for _ in range(14):
+            self.draw_tile()
