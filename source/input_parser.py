@@ -2,9 +2,11 @@ from vector2d import Vector2d
 from color import Color
 
 
-# Temporary command line parser
-# No input validation
 class InputParser:
+    """Temporary command line parser.
+
+    No input validation"""
+
     def __init__(self):
         self.words = input().split()
 
@@ -16,6 +18,9 @@ class InputParser:
 
     def is_remove(self):
         return self.words[0] == "remove"
+
+    def is_draw(self):
+        return self.words[0] == "draw"
 
     def is_verify(self):
         return self.words[0] == "verify"

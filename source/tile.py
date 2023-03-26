@@ -16,3 +16,9 @@ class Tile:
 
     def __str__(self):
         return str(self.value) + str(self.color)
+
+    def __eq__(self, other):
+        if not isinstance(other, Tile):
+            return False
+
+        return self.color == other.color and self.value == other.value
