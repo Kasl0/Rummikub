@@ -15,4 +15,4 @@ class Tile:
         self.color = color
 
     def __str__(self):
-        return str(self.color) + str(self.value)
+        return str(self.value) + str(self.color)

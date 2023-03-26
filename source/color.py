@@ -10,10 +10,10 @@ class Color(Enum):
     def __str__(self):
 
         if self.value == 1:
-            return "Ba"
+            return "black"
         if self.value == 2:
-            return "Bu"
+            return "blue"
         if self.value == 3:
-            return "R"
+            return "red"
         if self.value == 4:
-            return "Y"
+            return "yellow"
