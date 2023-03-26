@@ -7,7 +7,7 @@ class TilePool:
     """Pool of tiles which can be drawn by the player"""
 
     def __init__(self):
-        self.tiles = []
+        self.__tiles = []
 
         for color in Color:
             for value in range(1, 14):

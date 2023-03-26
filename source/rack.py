@@ -9,7 +9,7 @@ class Rack:
     Rack aggregates tiles currently owned by the player"""
 
     def __init__(self):
-        self.tiles = []
+        self.__tiles = []
 
     def if_tile_on_rack(self, tile: Tile):
         """Check if given tile is on the rack (if is available)"""
