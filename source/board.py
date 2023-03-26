@@ -69,9 +69,19 @@ class Board:
         self.cells[position_to.y][position_to.x] = self.cells[position_from.y][position_from.x]
         self.cells[position_from.y][position_from.x] = None
 
+    # Take tile off the board and return it
+    def take_tile_off(self, position: Vector2d):
+        tile = self.tile_at(position)
+        if tile is None:
+            return None
+
+        self._remove_tile(position)
+        return tile
+
+
     # Removes tile from given position
-    # TO DO: VERIFY WHETHER TILE CAN BE REMOVED - WHETHER TILE IS CURRENT PLAYER TILE
-    def remove_tile(self, position: Vector2d):
+    # TODO: VERIFY WHETHER TILE CAN BE REMOVED - WHETHER TILE IS CURRENT PLAYER TILE
+    def _remove_tile(self, position: Vector2d):
 
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
