@@ -17,6 +17,9 @@ class InputParser:
     def is_remove(self):
         return self.words[0] == "remove"
 
+    def is_draw(self):
+        return self.words[0] == "draw"
+
     def is_verify(self):
         return self.words[0] == "verify"
 
