@@ -11,3 +11,9 @@ class Vector2d:
 
     def __str__(self):
         return "(" + str(self.x) + "," + str(self.y) + ")"
+
+    def __eq__(self, other):
+        if not isinstance(other, Vector2d):
+            return False
+
+        return self.x == other.x and self.y == other.y
