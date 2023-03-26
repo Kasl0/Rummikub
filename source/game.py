@@ -9,30 +9,13 @@ from vector2d import Vector2d
 
 
 class Game:
-    def __init__(self, player_tiles: list[Tile] = [], pool_unavailable_tiles: list[Tile] = []):
+    def __init__(self):
         self.board = Board()
-        self.tile_pool = TilePool(pool_unavailable_tiles)
-        self.rack = Rack(player_tiles)
+        self.tile_pool = TilePool()
+        self.rack = Rack()
 
         self.player = Player(self.board, self.tile_pool, self.rack)
-
-        # For testing purposes:
-        # self.board.place_tile(Tile(1, Color.Red), Vector2d(0, 0))
-        # self.board.place_tile(Tile(2, Color.Red), Vector2d(1, 0))
-        # self.board.place_tile(Tile(3, Color.Red), Vector2d(2, 0))
-
-        # self.board.place_tile(Tile(7, Color.Red), Vector2d(19, 1))
-        # self.board.place_tile(Tile(7, Color.Blue), Vector2d(20, 1))
-        # self.board.place_tile(Tile(7, Color.Black), Vector2d(21, 1))
-        #
-        self.player.place_tile(Tile(1, Color.Red), Vector2d(0, 0))
-        self.player.place_tile(Tile(2, Color.Red), Vector2d(1, 0))
-        self.player.place_tile(Tile(3, Color.Red), Vector2d(2, 0))
-
-        self.player.place_tile(Tile(7, Color.Red), Vector2d(19, 1))
-        self.player.place_tile(Tile(7, Color.Blue), Vector2d(20, 1))
-        self.player.place_tile(Tile(7, Color.Black), Vector2d(21, 1))
-        #
+        self.player.draw_starting_tiles()
 
     def start(self):
 
