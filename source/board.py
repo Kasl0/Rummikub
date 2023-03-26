@@ -27,7 +27,7 @@ class Board:
         if not 0 <= position.y < self.rows:
             raise TypeError("Row with such index does not exist")
         if not 0 <= position.x < self.columns:
-            raise TypeError("Column with such index does not exist")
+            raise TypeError("Column with such index " + position.x.__str__() + " does not exist")
 
         return self.cells[position.y][position.x]
 
