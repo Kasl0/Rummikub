@@ -27,12 +27,7 @@ class Player:
         if not self.rack.if_tile_on_rack(tile):
             raise Exception("Player doesn't have tile " + tile.__str__() + " on his rack")
 
-        try:
-            self.board.place_tile(tile, position)
-        except:
-            raise Exception("Couldn't place tile " + tile.__str__() +
-                            " on position " + position.__str__() +
-                            " on the board")
+        self.board.place_tile(tile, position)
 
         self.rack.remove_tile(tile)
 

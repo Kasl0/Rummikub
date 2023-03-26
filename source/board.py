@@ -17,59 +17,59 @@ class Board:
         if not 1 <= columns <= 50:
             raise TypeError("Columns must be between 1 and 50")
 
-        self.rows = rows
-        self.columns = columns
-        self.cells = [[None for _ in range(columns)] for __ in range(rows)]
+        self._rows = rows
+        self._columns = columns
+        self._cells = [[None for _ in range(columns)] for __ in range(rows)]
 
     def tile_at(self, position: Vector2d) -> Optional[Tile]:
         """Returns tile at given position or None if position is not occupied"""
 
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
-        if not 0 <= position.y < self.rows:
+        if not 0 <= position.y < self._rows:
             raise TypeError("Row with such index does not exist")
-        if not 0 <= position.x < self.columns:
+        if not 0 <= position.x < self._columns:
             raise TypeError("Column with such index " + position.x.__str__() + " does not exist")
 
-        return self.cells[position.y][position.x]
+        return self._cells[position.y][position.x]
 
     def place_tile(self, tile: Tile, position: Vector2d):
         """Places given tile at given position on the board"""
 
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
-        if not 0 <= position.y < self.rows:
+        if not 0 <= position.y < self._rows:
             raise TypeError("Row with such index does not exist")
-        if not 0 <= position.x < self.columns:
+        if not 0 <= position.x < self._columns:
             raise TypeError("Column with such index does not exist")
         if self.tile_at(position):
             raise TypeError("Position is occupied")
 
-        self.cells[position.y][position.x] = tile
+        self._cells[position.y][position.x] = tile
 
     def move_tile(self, position_from: Vector2d, position_to: Vector2d):
         """Moves tile on the board"""
 
         if not isinstance(position_from, Vector2d):
             raise TypeError("Position_from must be Vector2d")
-        if not 0 <= position_from.y < self.rows:
+        if not 0 <= position_from.y < self._rows:
             raise TypeError("Position_from row with such index does not exist")
-        if not 0 <= position_from.x < self.columns:
+        if not 0 <= position_from.x < self._columns:
             raise TypeError("Position_from column with such index does not exist")
         if not self.tile_at(position_from):
             raise TypeError("Position_from is not occupied")
 
         if not isinstance(position_to, Vector2d):
             raise TypeError("Position_to must be Vector2d")
-        if not 0 <= position_to.y < self.rows:
+        if not 0 <= position_to.y < self._rows:
             raise TypeError("Position_to row with such index does not exist")
-        if not 0 <= position_to.x < self.columns:
+        if not 0 <= position_to.x < self._columns:
             raise TypeError("Position_to column with such index does not exist")
         if self.tile_at(position_to):
             raise TypeError("Position_to is occupied")
 
-        self.cells[position_to.y][position_to.x] = self.cells[position_from.y][position_from.x]
-        self.cells[position_from.y][position_from.x] = None
+        self._cells[position_to.y][position_to.x] = self._cells[position_from.y][position_from.x]
+        self._cells[position_from.y][position_from.x] = None
 
     def take_tile_off(self, position: Vector2d):
         """Take tile off the board and return it"""
@@ -78,24 +78,24 @@ class Board:
         if tile is None:
             return None
 
-        self._remove_tile(position)
+        self.__remove_tile(position)
         return tile
 
 
     # TODO: VERIFY WHETHER TILE CAN BE REMOVED - WHETHER TILE IS CURRENT PLAYER TILE
-    def _remove_tile(self, position: Vector2d):
+    def __remove_tile(self, position: Vector2d):
         """Removes tile from given position"""
 
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
-        if not 0 <= position.y < self.rows:
+        if not 0 <= position.y < self._rows:
             raise TypeError("Row with such index does not exist")
-        if not 0 <= position.x < self.columns:
+        if not 0 <= position.x < self._columns:
             raise TypeError("Column with such index does not exist")
         if not self.tile_at(position):
             raise TypeError("Position is not occupied")
 
-        self.cells[position.y][position.x] = None
+        self._cells[position.y][position.x] = None
 
     def verify(self):
         """Verifies the board, checks if every tile is placed correctly.
@@ -104,32 +104,32 @@ class Board:
             (True, None, None, None, None) if everything is placed correctly. If not, returns
             (False, row, column_sequence_start, column_sequence_end, error_message)"""
 
-        for row in range(self.rows):
+        for row in range(self._rows):
             sequence_start = None
 
-            for column in range(self.columns):
+            for column in range(self._columns):
                 tile = self.tile_at(Vector2d(column, row))
 
                 if isinstance(tile, Tile) and sequence_start is None:
                     sequence_start = column
 
                 elif not isinstance(tile, Tile) and sequence_start is not None:
-                    verify_result, error_message = self._verify_sequence(row, sequence_start, column - 1)
+                    verification_result, error_message = self.__verify_sequence(row, sequence_start, column - 1)
 
-                    if not verify_result:
+                    if not verification_result:
                         return False, row, sequence_start, column - 1, error_message
 
                     sequence_start = None
 
             if sequence_start is not None:
-                verify_result, error_message = self._verify_sequence(row, sequence_start, self.columns - 1)
+                verification_result, error_message = self.__verify_sequence(row, sequence_start, self._columns - 1)
 
-                if not verify_result:
-                    return False, row, sequence_start, self.columns-1, error_message
+                if not verification_result:
+                    return False, row, sequence_start, self._columns - 1, error_message
 
         return True, None, None, None, None
 
-    def _verify_sequence(self, row, start_column, end_column):
+    def __verify_sequence(self, row, start_column, end_column):
 
         if end_column - start_column < 2:
             return False, "Sequence must be at least 3 tiles long"
@@ -161,11 +161,11 @@ class Board:
     def __str__(self):
         return_string = ""
 
-        for row in range(self.rows):
-            for column in range(self.columns):
+        for row in range(self._rows):
+            for column in range(self._columns):
                 tile = self.tile_at(Vector2d(column, row))
                 if isinstance(tile, Tile):
-                    return_string += str(self.cells[row][column])
+                    return_string += str(self._cells[row][column])
                 else:
                     return_string += "'"
                 return_string += " "
