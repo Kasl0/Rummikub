@@ -23,7 +23,11 @@ class TilePool:
         return False
 
     # draw a random tile from the pool
+    # return drawn tile or None if there's no more tiles in the pool
     def draw_random_tile(self):
+        if len(self.tiles) == 0:
+            raise Exception("No more tiles in the tile pool")
+
         rnd_num = randint(0, len(self.tiles) - 1)
         tile_to_return = self.tiles[rnd_num]
 
