@@ -4,6 +4,7 @@ from random import randint
 
 
 class TilePool:
+    """Pool of tiles which can be drawn by the player"""
     def __init__(self, unavailable_tiles: list[Tile] = []):
         self.tiles = []
         for color in Color:
@@ -15,16 +16,19 @@ class TilePool:
         for tile in unavailable_tiles:
             self.remove_tile(tile)
 
-    # check if given tile is in the pool
     def if_tile_in_pool(self, tile: Tile):
+        """Check if given tile is in the pool"""
+
         for rack_tile in self.tiles:
             if rack_tile is tile:
                 return True
         return False
 
-    # draw a random tile from the pool
-    # return drawn tile or None if there's no more tiles in the pool
     def draw_random_tile(self):
+        """Draw a random tile from the pool.
+
+        Returns drawn tile or None if there's no more tiles in the pool"""
+
         if len(self.tiles) == 0:
             raise Exception("No more tiles in the tile pool")
 

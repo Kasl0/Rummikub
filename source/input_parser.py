@@ -2,9 +2,11 @@ from vector2d import Vector2d
 from color import Color
 
 
-# Temporary command line parser
-# No input validation
 class InputParser:
+    """Temporary command line parser.
+
+    No input validation"""
+
     def __init__(self):
         self.words = input().split()
 

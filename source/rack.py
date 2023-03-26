@@ -4,11 +4,15 @@ from tile import Tile
 
 
 class Rack:
+    """Respresents player's rack.
+
+    Rack aggregates tiles currently owned by the player"""
     def __init__(self, starting_tiles: list[Tile] = []):
         self.tiles = starting_tiles
 
-    # check if given tile is on the rack (if is available)
     def if_tile_on_rack(self, tile: Tile):
+        """Check if given tile is on the rack (if is available)"""
+
         if tile in self.tiles:
             return True
         return False
@@ -17,6 +21,8 @@ class Rack:
         self.tiles.append(tile)
 
     def remove_tile(self, tile: Tile):
+        """Remove given tile from the rack"""
+
         self.tiles.remove(tile)
 
     def __str__(self):
