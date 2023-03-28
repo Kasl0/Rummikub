@@ -11,11 +11,11 @@ class Board:
         if not isinstance(rows, int):
             raise TypeError("Rows must be int")
         if not 1 <= rows <= 15:
-            raise TypeError("Rows must be between 1 and 15")
+            raise ValueError("Rows must be between 1 and 15")
         if not isinstance(columns, int):
             raise TypeError("Columns must be int")
         if not 1 <= columns <= 50:
-            raise TypeError("Columns must be between 1 and 50")
+            raise ValueError("Columns must be between 1 and 50")
 
         self._rows = rows
         self._columns = columns
@@ -27,9 +27,9 @@ class Board:
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
         if not 0 <= position.y < self._rows:
-            raise TypeError("Row with such index does not exist")
+            raise ValueError("Row with such index does not exist")
         if not 0 <= position.x < self._columns:
-            raise TypeError("Column with such index " + position.x.__str__() + " does not exist")
+            raise ValueError("Column with such index " + position.x.__str__() + " does not exist")
 
         return self._cells[position.y][position.x]
 
@@ -39,11 +39,11 @@ class Board:
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
         if not 0 <= position.y < self._rows:
-            raise TypeError("Row with such index does not exist")
+            raise ValueError("Row with such index does not exist")
         if not 0 <= position.x < self._columns:
-            raise TypeError("Column with such index does not exist")
+            raise ValueError("Column with such index does not exist")
         if self.tile_at(position):
-            raise TypeError("Position is occupied")
+            raise ValueError("Position is occupied")
 
         self._cells[position.y][position.x] = tile
 
@@ -53,20 +53,20 @@ class Board:
         if not isinstance(position_from, Vector2d):
             raise TypeError("Position_from must be Vector2d")
         if not 0 <= position_from.y < self._rows:
-            raise TypeError("Position_from row with such index does not exist")
+            raise ValueError("Position_from row with such index does not exist")
         if not 0 <= position_from.x < self._columns:
-            raise TypeError("Position_from column with such index does not exist")
+            raise ValueError("Position_from column with such index does not exist")
         if not self.tile_at(position_from):
-            raise TypeError("Position_from is not occupied")
+            raise ValueError("Position_from is not occupied")
 
         if not isinstance(position_to, Vector2d):
             raise TypeError("Position_to must be Vector2d")
         if not 0 <= position_to.y < self._rows:
-            raise TypeError("Position_to row with such index does not exist")
+            raise ValueError("Position_to row with such index does not exist")
         if not 0 <= position_to.x < self._columns:
-            raise TypeError("Position_to column with such index does not exist")
+            raise ValueError("Position_to column with such index does not exist")
         if self.tile_at(position_to):
-            raise TypeError("Position_to is occupied")
+            raise ValueError("Position_to is occupied")
 
         self._cells[position_to.y][position_to.x] = self._cells[position_from.y][position_from.x]
         self._cells[position_from.y][position_from.x] = None
@@ -89,11 +89,11 @@ class Board:
         if not isinstance(position, Vector2d):
             raise TypeError("Position must be Vector2d")
         if not 0 <= position.y < self._rows:
-            raise TypeError("Row with such index does not exist")
+            raise ValueError("Row with such index does not exist")
         if not 0 <= position.x < self._columns:
-            raise TypeError("Column with such index does not exist")
+            raise ValueError("Column with such index does not exist")
         if not self.tile_at(position):
-            raise TypeError("Position is not occupied")
+            raise ValueError("Position is not occupied")
 
         self._cells[position.y][position.x] = None
 

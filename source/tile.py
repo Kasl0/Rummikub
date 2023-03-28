@@ -7,7 +7,7 @@ class Tile:
         if not isinstance(value, int):
             raise TypeError("Value must be int")
         if not 1 <= value <= 13:
-            raise TypeError("Value must be between 1 and 13")
+            raise ValueError("Value must be between 1 and 13")
         if not isinstance(color, Color):
             raise TypeError("Color must be Color(Enum)")
 
