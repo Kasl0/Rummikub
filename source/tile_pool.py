@@ -1,3 +1,5 @@
+import random
+
 from color import Color
 from tile import Tile
 from random import randint
@@ -14,7 +16,8 @@ class TilePool:
                 # each tile has to copies in starting pool
                 self.__tiles.append(Tile(value, color))
                 self.__tiles.append(Tile(value, color))
-        #TODO shuffle
+
+        random.shuffle(self.__tiles)
 
 
     def if_tile_in_pool(self, tile: Tile):
@@ -31,13 +34,22 @@ class TilePool:
         Returns drawn tile or None if there's no more tiles in the pool"""
 
         if len(self.__tiles) == 0:
-            raise ValueError("No more tiles in the tile pool")
+            return None
 
-        rnd_num = randint(0, len(self.__tiles) - 1)
-        tile_to_return = self.__tiles[rnd_num]
+        tile_to_return = self.__tiles[-1]
 
         self.remove_tile(tile_to_return)
         return tile_to_return
 
     def remove_tile(self, tile: Tile):
         self.__tiles.remove(tile)
+
+    def __str__(self):
+        res = "["
+
+        for tile in self.__tiles:
+            res += tile.__str__() + ", "
+
+        res += "]"
+
+        return res
