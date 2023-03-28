@@ -14,6 +14,8 @@ class TilePool:
                 # each tile has to copies in starting pool
                 self.__tiles.append(Tile(value, color))
                 self.__tiles.append(Tile(value, color))
+        #TODO shuffle
+
 
     def if_tile_in_pool(self, tile: Tile):
         """Check if given tile is in the pool"""
@@ -29,7 +31,7 @@ class TilePool:
         Returns drawn tile or None if there's no more tiles in the pool"""
 
         if len(self.__tiles) == 0:
-            raise Exception("No more tiles in the tile pool")
+            raise ValueError("No more tiles in the tile pool")
 
         rnd_num = randint(0, len(self.__tiles) - 1)
         tile_to_return = self.__tiles[rnd_num]

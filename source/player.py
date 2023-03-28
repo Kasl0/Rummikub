@@ -25,7 +25,7 @@ class Player:
         """Place given tile on given position at the board"""
 
         if not self.rack.if_tile_on_rack(tile):
-            raise Exception("Player doesn't have tile " + tile.__str__() + " on his rack")
+            raise ValueError("Player doesn't have tile " + tile.__str__() + " on his rack")
 
         self.board.place_tile(tile, position)
 
