@@ -4,8 +4,6 @@ from tile_pool import TilePool
 from tile import Tile
 from board import Board
 from input_parser import InputParser
-from color import Color
-from vector2d import Vector2d
 
 
 class Game:

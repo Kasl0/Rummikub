@@ -1,11 +1,8 @@
-from color import Color
-from game import Game
-from tile import Tile
+from start_screen import StartScreen
 
 
 def main():
-    game = Game()
-    game.start()
+    StartScreen()
 
 
 if __name__ == '__main__':
