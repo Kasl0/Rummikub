@@ -24,11 +24,11 @@ class StartScreen:
 
                 for i in range(14):  # receive 14 tiles
                     print("Tile from the server:", client.receive())
+                    # TODO: Parse received string to Tile object and add tile to player's rack
 
                 print("All tiles received")
 
                 # Client - actual game
-
                 #
                 #
                 #
@@ -55,7 +55,6 @@ class StartScreen:
                 print("All tiles dealt")
 
                 # Server - actual game
-
                 #
                 #
                 #

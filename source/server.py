@@ -1,5 +1,6 @@
 import socket
 import msvcrt
+import random
 
 
 class Server:
@@ -10,8 +11,8 @@ class Server:
         self.ip = socket.gethostbyname(self.hostname)
 
         print("Server IP:", self.ip)
-        # self.port = int(input("Enter the server port: "))
-        self.port = 1234
+        # self.port = 1234
+        self.port = int(input("Enter the server port: "))
 
         # dictionary of clients
         # keys - assigned client ids
@@ -37,7 +38,7 @@ class Server:
 
             # TODO: Make "Start game" button and check if it is pressed in bellow's if statement
             # Temporary solution: Game is started when user presses any key
-            # Works only in cmd outside of PyCharm!!!
+            # Works only in cmd outside PyCharm!!!
             # In PyCharm msvcrt.kbhit() doesn't detect key press and you can't start a game by any means
             if msvcrt.kbhit():
                 self.__init_game()
@@ -78,6 +79,8 @@ class Server:
         if self.s:
             self.s.close()
 
+        print("Closed all connections and socket")
+
     def send(self, client_id, message):
         """Sends message to the client by the given id.
         Message can be of type str or int"""
@@ -100,3 +103,8 @@ class Server:
     def __init_game(self):
         self.send_all("Starting game")
         print("The game has started")
+
+    def get_random_client_id(self):
+        """Returns id of random client"""
+
+        return random.choice(list(self.clients.keys()))

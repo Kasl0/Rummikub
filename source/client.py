@@ -11,16 +11,16 @@ class Client:
         self.id = None
 
         # client's username (entered by user)
-        self.username = "Kaslo"
-        # self.username = input("Enter your username: ")
+        # self.username = "Jan"
+        self.username = input("Enter your username: ")
 
         # server's ip (entered by user)
-        self.ip = "192.168.1.28"
-        # self.ip = input("Enter the server IP: ")
+        # self.ip = "192.168.1.28"
+        self.ip = input("Enter the server IP: ")
 
         # server's port (entered by user)
-        self.port = 1234
-        # self.port = int(input("Enter the server port: "))
+        # self.port = 1234
+        self.port = int(input("Enter the server port: "))
 
     def connect(self):
         """Connects to the socket server, sends client's username,
@@ -41,6 +41,8 @@ class Client:
 
         if self.s:
             self.s.close()
+
+        print("Closed connection with the server")
 
     def send(self, message):
         """Sends message to the server. Message can be of type str or int"""
