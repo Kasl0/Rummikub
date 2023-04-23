@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 
 from server import Server
 from board import Board
@@ -38,9 +38,9 @@ class ServerGame:
 		self.stage2()
 		print("All tiles dealt")
 
-		print("Proper game starts!")
+		#print("Proper game starts!")
 		self.stage3()
-		print("We have a winner")
+		#print("We have a winner")
 
 		print("Closing server")
 		self.stage4()
@@ -50,6 +50,7 @@ class ServerGame:
 	def stage1(self):
 		"""Initialise server and wait for players to join"""
 		self.server.start()
+		self.server.send_all("Starting game")
 
 	def stage2(self):
 		"""Initialise game: create tile rack for all players and send them their initial tiles"""
