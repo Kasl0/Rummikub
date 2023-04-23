@@ -1,6 +1,5 @@
 from client import Client
-from server import Server
-from tile_pool import TilePool
+from server_game import ServerGame
 
 
 class StartScreen:
@@ -39,28 +38,8 @@ class StartScreen:
 
             elif choice == "2":
 
-                # Server - session creation
-                server = Server()
-                server.start()
+                ServerGame().play()
 
-                # Server - game initialization
-                tile_pool = TilePool()
-
-                for client_id in server.clients.keys():
-
-                    # draw 14 tiles
-                    for i in range(14):
-                        server.send(client_id, str(tile_pool.draw_random_tile()))
-
-                print("All tiles dealt")
-
-                # Server - actual game
-                #
-                #
-                #
-                #
-
-                server.close()
                 break
 
             elif choice == "3":

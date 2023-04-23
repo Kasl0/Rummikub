@@ -21,15 +21,15 @@ class Server:
 
         self.next_free_id = 1
 
-    def start(self):
-        """Starts a socket server, waits for the players and calls self.__init_game()
-        when there was an action to start the game"""
-
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.s.bind((self.ip, self.port))  # TCP server has started
         self.s.setblocking(False)  # Waiting for players does not block the server
         self.s.listen()  # TCP server is now listening
+
+    def start(self):
+        """Waits for the players and calls self.__init_game()
+        when there was an action to start the game"""
 
         print("Game lobby is now open - waiting for players")
 
@@ -41,10 +41,8 @@ class Server:
             # Works only in cmd outside PyCharm!!!
             # In PyCharm msvcrt.kbhit() doesn't detect key press and you can't start a game by any means
             if msvcrt.kbhit():
-                self.__init_game()
                 break
             else:
-
                 try:
                     # accept a new connection
                     client_socket, client_address = self.s.accept()
@@ -99,10 +97,6 @@ class Server:
         Returns string"""
 
         return self.clients[client_id][0].recv(1024).decode()
-
-    def __init_game(self):
-        self.send_all("Starting game")
-        print("The game has started")
 
     def get_random_client_id(self):
         """Returns id of random client"""
