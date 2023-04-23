@@ -26,7 +26,7 @@ class ClientGame:
 
 		print("Receive starting tiles from the server")
 		self.stage2()
-		print("All tiles obtained")
+		print("All tiles received")
 
 		#print("Proper game starts!")
 		self.stage3()
@@ -40,16 +40,14 @@ class ClientGame:
 	def stage1(self):
 		"""Connect with server and join a session"""
 		self.client.connect()
-		print("Server:", self.client.receive())  # Client waits for starting game signal
+		print("Server:", self.client.receive().content)  # Client waits for starting game signal
 
 	def stage2(self):
 		"""Game initialisation - receive starting tiles from server"""
 
-		for i in range(14):  # receive 14 tiles
-			print("Tile from the server:", self.client.receive())
-		# TODO: Parse received string to Tile object and add tile to player's rack
-
-		print("All tiles received")
+		message = self.client.receive()
+		self.rack = message.content
+		print("Rack from the server:", self.rack)
 
 	def stage3(self):
 		"""Proper game loop. If your turn, perform actions, else listen to changes"""

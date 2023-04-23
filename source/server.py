@@ -1,6 +1,9 @@
 import socket
 import msvcrt
 import random
+import pickle
+
+from message import Message, MessageType
 
 
 class Server:
@@ -56,7 +59,8 @@ class Server:
 
         # Receive client's username
         client_socket.settimeout(5)
-        client_username = client_socket.recv(1024).decode()
+        # client_socket.recv(1024).decode()
+        client_username = pickle.loads(client_socket.recv(1024)).content
 
         # add client to the dictionary
         self.clients[self.next_free_id] = [client_socket, client_address, client_username]
@@ -65,7 +69,7 @@ class Server:
         print("New player:", client_username, client_address, "with assigned ID:", self.next_free_id)
 
         # send client assigned id
-        self.send(self.next_free_id, self.next_free_id)
+        self.send(self.next_free_id, Message(MessageType.PLAYER_JOINED, self.next_free_id))
 
         self.next_free_id += 1
 
@@ -79,24 +83,24 @@ class Server:
 
         print("Closed all connections and socket")
 
-    def send(self, client_id, message):
+    def send(self, client_id, message: Message):
         """Sends message to the client by the given id.
         Message can be of type str or int"""
 
-        self.clients[client_id][0].sendall(str(message).encode())
+        self.clients[client_id][0].sendall(pickle.dumps(message))
 
-    def send_all(self, message):
+    def send_all(self, message: Message):
         """Sends message to all connected clients.
         Message can be of type str or int"""
 
         for client_id in self.clients.keys():
             self.send(client_id, message)
 
-    def receive(self, client_id):
+    def receive(self, client_id) -> Message:
         """Receives message from client with the given id.
         Returns string"""
 
-        return self.clients[client_id][0].recv(1024).decode()
+        return pickle.loads(self.clients[client_id][0].recv(1024))
 
     def get_random_client_id(self):
         """Returns id of random client"""
