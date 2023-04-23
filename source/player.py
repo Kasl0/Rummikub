@@ -19,13 +19,15 @@ class Player:
         """Draw random tile from the pool of available tile"""
 
         drawn_tile = self.tile_pool.draw_random_tile()
+        if drawn_tile is None:
+            raise ValueError("No tiles to draw from the pool")
         self.rack.add_tile(drawn_tile)
 
     def place_tile(self, tile: Tile, position: Vector2d):
         """Place given tile on given position at the board"""
 
         if not self.rack.if_tile_on_rack(tile):
-            raise Exception("Player doesn't have tile " + tile.__str__() + " on his rack")
+            raise ValueError("Player doesn't have tile " + tile.__str__() + " on his rack")
 
         self.board.place_tile(tile, position)
 
