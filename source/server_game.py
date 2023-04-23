@@ -1,8 +1,10 @@
+from time import sleep
 from typing import Dict
 
 from server import Server
 from board import Board
 from rack import Rack
+from message import Message, MessageType
 from tile_pool import TilePool
 
 
@@ -36,7 +38,7 @@ class ServerGame:
 
 		print("Drawing starting tiles and sending them to players")
 		self.stage2()
-		print("All tiles dealt")
+		print("All starting racks sent")
 
 		#print("Proper game starts!")
 		self.stage3()
@@ -49,17 +51,18 @@ class ServerGame:
 
 	def stage1(self):
 		"""Initialise server and wait for players to join"""
-		self.server.start()
-		self.server.send_all("Starting game")
+		self.server.start()	# wait for all players to join
+		self.server.send_all(Message(MessageType.GAME_STARTS, "Starting game"))
 
 	def stage2(self):
 		"""Initialise game: create tile rack for all players and send them their initial tiles"""
 		for client_id in self.server.clients.keys():
 			self.racks[client_id] = Rack()
+
 			for i in range(14):
-				drawn_tile = self.tile_pool.draw_random_tile()
-				self.racks[client_id].add_tile(drawn_tile)
-				self.server.send(client_id, str(drawn_tile))
+				self.racks[client_id].add_tile(self.tile_pool.draw_random_tile())
+
+			self.server.send(client_id, Message(MessageType.TRUE_RACK, self.racks[client_id]))
 
 	def stage3(self):
 		"""Proper game loop. Players take turns and perform actions"""
