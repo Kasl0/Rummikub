@@ -13,6 +13,8 @@ class ClientGame:
 		self.board = Board()
 		self.rack = Rack()
 
+		self.winner = None
+
 	def play(self):
 		"""Go through all game stages:\n
 				1. join server,\n
@@ -53,9 +55,10 @@ class ClientGame:
 		"""Main game part loop"""
 
 		player = ClientActor(self.board, self.rack, self.client)
-		player.play_main_game_part()  # from now on object of class Player plays the main part of game
+		self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game
 
 	def stage4(self):
 		"""End game, disconnect players, turn off the server"""
+		print("The winner is: " + str(self.winner))
 		self.client.close_connection()
 		pass
