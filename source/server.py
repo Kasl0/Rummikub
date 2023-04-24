@@ -14,8 +14,9 @@ class Server:
         self.ip = socket.gethostbyname(self.hostname)
 
         print("Server IP:", self.ip)
-        # self.port = 1234
-        self.port = int(input("Enter the server port: "))
+        self.port = 1234
+        # TODO: revert input
+        #self.port = int(input("Enter the server port: "))
 
         # dictionary of clients
         # keys - assigned client ids
@@ -60,7 +61,10 @@ class Server:
         # Receive client's username
         client_socket.settimeout(5)
         # client_socket.recv(1024).decode()
-        client_username = pickle.loads(client_socket.recv(1024)).content
+        message = pickle.loads(client_socket.recv(1024))
+        print(message)
+        client_username = message.content
+        client_socket.settimeout(None)
 
         # add client to the dictionary
         self.clients[self.next_free_id] = [client_socket, client_address, client_username]
@@ -84,23 +88,30 @@ class Server:
         print("Closed all connections and socket")
 
     def send(self, client_id, message: Message):
-        """Sends message to the client by the given id.
-        Message can be of type str or int"""
+        """Sends message to the client by the given id."""
 
         self.clients[client_id][0].sendall(pickle.dumps(message))
 
     def send_all(self, message: Message):
-        """Sends message to all connected clients.
-        Message can be of type str or int"""
+        """Sends message to all connected clients."""
 
         for client_id in self.clients.keys():
             self.send(client_id, message)
+
+    def send_all_except(self, exempted_client_id, message: Message):
+        """Sends message to all connected clients except for the exempted one."""
+
+        for client_id in self.clients.keys():
+            if client_id != exempted_client_id:
+                self.send(client_id, message)
 
     def receive(self, client_id) -> Message:
         """Receives message from client with the given id.
         Returns string"""
 
-        return pickle.loads(self.clients[client_id][0].recv(1024))
+        message = pickle.loads(self.clients[client_id][0].recv(1024))
+        print(message)
+        return message
 
     def get_random_client_id(self):
         """Returns id of random client"""

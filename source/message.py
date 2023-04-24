@@ -29,4 +29,7 @@ class Message:
 		self.content = content
 
 	def __str__(self):
-		return "{message_type: " + str(self.type) + ", content: " + str(self.content) + "}"
+		return "{\n" +\
+				"\tmessage_type: " + str(self.type) +\
+				",\n\tcontent: " + str(self.content) +\
+				"\n}"
