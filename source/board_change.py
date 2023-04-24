@@ -17,3 +17,9 @@ class BoardChange:
 		self.tile = tile
 		self.first_position = first_position
 		self.second_position = second_position
+
+	def __str__(self):
+		return "{change_type: " + self.change_type.__str__() +\
+			", tile: " + self.tile.__str__() +\
+			", first_position: " + self.first_position.__str__() +\
+			", second_position: " + self.second_position.__str__()

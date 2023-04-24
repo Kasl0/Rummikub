@@ -1,10 +1,9 @@
-from time import sleep
 from typing import Dict
 
 from server import Server
-from board import Board
 from rack import Rack
 from message import Message, MessageType
+from server_actor import ServerActor
 from tile_pool import TilePool
 
 
@@ -14,12 +13,13 @@ class ServerGame:
 
 		# game initialization
 		self.tile_pool = TilePool()
-		self.board = Board()
 
 		# dictionary of clients' racks
 		# key - assigned client id
 		# value - his rack
 		self.racks: Dict[int, Rack] = {}
+
+		self.winner = None
 
 	def play(self):
 		"""Go through all game stages:\n
@@ -36,9 +36,9 @@ class ServerGame:
 		self.stage2()
 		print("All starting racks sent")
 
-		# print("Main game part starts!")
+		print("Main game part starts!")
 		self.stage3()
-		# print("We have a winner")
+		print("We have a winner")
 
 		print("Closing server")
 		self.stage4()
@@ -62,10 +62,12 @@ class ServerGame:
 
 	def stage3(self):
 		"""Main game part loop. Players take turns and perform actions"""
-		sleep(10)
-		pass
+		server_actor = ServerActor(self.racks, self.tile_pool, self.server)
+		self.winner = server_actor.serve_main_game_part()  # enter main part of the game
 
 	def stage4(self):
 		"""End game, disconnect players, turn off the server"""
+		winner_username = self.server.clients[self.winner][2]
+		self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
 		self.server.close()
 		pass

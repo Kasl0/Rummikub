@@ -26,6 +26,9 @@ class Rack:
 
         self.__tiles.remove(tile)
 
+    def is_empty(self) -> bool:
+        return len(self.__tiles) == 0
+
     def __str__(self):
         res = '['
         for tile in self.__tiles:
