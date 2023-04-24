@@ -53,8 +53,6 @@ class ServerActor:
 
                     drawn_tile = self.tile_pool.draw_random_tile()
                     self.true_racks[self.active_player_id].add_tile(drawn_tile)
-                    # TODO: ...
-                    sleep(1)
                     self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
                     break
 
@@ -73,7 +71,7 @@ class ServerActor:
                     verification_result = self.temp_board.verify()
 
                     if verification_result[0]:
-                        self.server.send(self.active_player_id, Message(MessageType.OK, None))
+                        self.server.send(self.active_player_id, Message(MessageType.OK, verification_result))
                         self.persist_temporary_elements()
                         self.server.send_all_except(
                             self.active_player_id,
@@ -114,6 +112,8 @@ class ServerActor:
         self.server.send_all_except(self.active_player_id, Message(MessageType.CHANGE_INTRODUCED, board_change))
 
     def announce_next_turn(self):
+        # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
+        sleep(1)
         self.server.send_all(Message(MessageType.NEXT_TURN, self.active_player_id))
 
     ######################################################
