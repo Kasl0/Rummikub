@@ -40,9 +40,9 @@ class Server:
         while True:
 
             # TODO: Make "Start game" button and check if it is pressed in bellow's if statement
-            # Temporary solution: Game is started when user presses any key
-            # Works only in cmd outside PyCharm!!!
-            # In PyCharm msvcrt.kbhit() doesn't detect key press and you can't start a game by any means
+            #  Temporary solution: Game is started when user presses any key
+            #  Works only in cmd outside PyCharm!!!
+            #  In PyCharm msvcrt.kbhit() doesn't detect key press and you can't start a game by any means
             if msvcrt.kbhit():
                 break
             else:
