@@ -7,10 +7,9 @@ class MessageType(Enum):
 	GAME_STARTS = 102,
 	TILE = 103,
 	NEXT_TURN = 104,
-	END_TURN = 105,
-	TRUE_BOARD = 106,
-	TRUE_RACK = 107,
-	GAME_ENDS = 108,
+	TRUE_BOARD = 105,
+	TRUE_RACK = 106,
+	GAME_ENDS = 107,
 
 	# client message types
 	JOIN = 201,
