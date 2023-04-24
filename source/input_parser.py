@@ -25,6 +25,12 @@ class InputParser:
     def is_verify(self):
         return self.words[0] == "verify"
 
+    def is_confirm(self):
+        return self.words[0] == "confirm"
+
+    def is_revert(self):
+        return self.words[0] == "revert"
+
     def is_exit(self):
         return self.words[0] == "exit"
 

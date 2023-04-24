@@ -9,27 +9,23 @@ from tile_pool import TilePool
 
 
 class ServerGame:
-	server: Server
-	tile_pool = TilePool()
-	board = Board()
-
-	# dictionary of clients' racks
-	# key - assigned client id
-	# value - his rack
-	racks: Dict[int, Rack] = {}
-
 	def __init__(self):
-		# server and session creation
 		self.server = Server()
 
 		# game initialization
 		self.tile_pool = TilePool()
+		self.board = Board()
+
+		# dictionary of clients' racks
+		# key - assigned client id
+		# value - his rack
+		self.racks: Dict[int, Rack] = {}
 
 	def play(self):
 		"""Go through all game stages:\n
 				1. initialise server + let players join,\n
 				2. initialise game,\n
-				3. host proper game,\n
+				3. host main game part,\n
 				4. end game + disconnect players + turn off the server"""
 
 		print("Initialising server")
@@ -40,9 +36,9 @@ class ServerGame:
 		self.stage2()
 		print("All starting racks sent")
 
-		#print("Proper game starts!")
+		# print("Main game part starts!")
 		self.stage3()
-		#print("We have a winner")
+		# print("We have a winner")
 
 		print("Closing server")
 		self.stage4()
@@ -51,7 +47,7 @@ class ServerGame:
 
 	def stage1(self):
 		"""Initialise server and wait for players to join"""
-		self.server.start()	# wait for all players to join
+		self.server.start()  # wait for all players to join
 		self.server.send_all(Message(MessageType.GAME_STARTS, "Starting game"))
 
 	def stage2(self):
@@ -65,7 +61,8 @@ class ServerGame:
 			self.server.send(client_id, Message(MessageType.TRUE_RACK, self.racks[client_id]))
 
 	def stage3(self):
-		"""Proper game loop. Players take turns and perform actions"""
+		"""Main game part loop. Players take turns and perform actions"""
+		sleep(10)
 		pass
 
 	def stage4(self):

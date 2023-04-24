@@ -1,7 +1,7 @@
 from board import Board
 from rack import Rack
 from client import Client
-from tile_pool import TilePool
+from client_actor import ClientActor
 
 
 class ClientGame:
@@ -17,7 +17,7 @@ class ClientGame:
 		"""Go through all game stages:\n
 				1. join server,\n
 				2. receive starting tiles,\n
-				3. play proper game,\n
+				3. play main game part,\n
 				4. end game sequence + disconnect from server"""
 
 		print("Connecting with server")
@@ -28,9 +28,9 @@ class ClientGame:
 		self.stage2()
 		print("All tiles received")
 
-		#print("Proper game starts!")
+		print("Main game part starts!")
 		self.stage3()
-		#print("We have a winner")
+		# print("We have a winner")
 
 		print("Closing connection with server")
 		self.stage4()
@@ -50,8 +50,10 @@ class ClientGame:
 		print("Rack from the server:", self.rack)
 
 	def stage3(self):
-		"""Proper game loop. If your turn, perform actions, else listen to changes"""
-		pass
+		"""Main game part loop"""
+
+		player = ClientActor(self.board, self.rack, self.client)
+		player.play_main_game_part()  # from now on object of class Player plays the main part of game
 
 	def stage4(self):
 		"""End game, disconnect players, turn off the server"""
