@@ -1,7 +1,6 @@
 import random
 
-from .color import Color
-from .tile import Tile
+from .tile import Color, Tile
 
 
 class TilePool:

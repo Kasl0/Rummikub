@@ -1,5 +1,5 @@
 from ..logic.vector2d import Vector2d
-from ..logic.color import Color
+from ..logic.tile import Color
 
 
 class InputParser:
