@@ -13,10 +13,10 @@ from vector2d import Vector2d
 
 
 class ServerActor:
-    """Represents the server
+    """Represents the main game part master
 
-    Manages whole game session. Informs players about next turns. Listens to active player.
-    It synchronises changes introduced by an active player and informs passive players about them.
+    Manages main game part. Informs players about next turns. Listens to active player.
+    Synchronises changes introduced by an active player and informs passive players about them.
     Has one, true and only valid board and racks states.
     """
 
@@ -34,7 +34,7 @@ class ServerActor:
         self.active_player_id = 1
 
     def serve_main_game_part(self) -> int:
-        """ Main game loop. If your turn, perform actions, else listen to changes"""
+        """ Main game loop. Manage whole session"""
         while True:
             print("New turn starts. Active player: " + self.active_player_id.__str__())
             self.temp_board = deepcopy(self.true_board)
@@ -46,40 +46,24 @@ class ServerActor:
                 print()
                 print(self.temp_rack)
                 print(self.temp_board)
+
                 message = self.server.receive(self.active_player_id)
 
                 if message.type == MessageType.DRAW_TILE:
-                    self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
-
-                    drawn_tile = self.tile_pool.draw_random_tile()
-                    self.true_racks[self.active_player_id].add_tile(drawn_tile)
-                    self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
+                    self.handle_draw_tile()
                     break
 
                 elif message.type == MessageType.CHANGE_INTRODUCED:
-                    self.introduced_board_change(message.content)
+                    self.handle_introduced_change(message.content)
 
                 elif message.type == MessageType.REVERT_CHANGES:
-                    self.temp_board = deepcopy(self.true_board)
-                    self.temp_rack = deepcopy(self.true_racks[self.active_player_id])
-
-                    self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
-                    # TODO: Will sleep be necessary here? Won't these two messages collide at active player's client?
-                    self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
+                    self.handle_revert_changes()
 
                 elif message.type == MessageType.CONFIRM_CHANGES:
-                    verification_result = self.temp_board.verify()
-
-                    if verification_result[0]:
-                        self.server.send(self.active_player_id, Message(MessageType.OK, verification_result))
-                        self.persist_temporary_elements()
-                        self.server.send_all_except(
-                            self.active_player_id,
-                            Message(MessageType.TRUE_BOARD, self.true_board))
+                    result = self.handle_confirm_changes()
+                    print("Confirmation response: " + result.__str__())
+                    if result[0]:
                         break
-                    else:
-                        self.server.send(self.active_player_id, Message(MessageType.NOT_OK, verification_result))
-
                 else:
                     raise ValueError("Received unexpected message: " + message.__str__())
 
@@ -92,44 +76,78 @@ class ServerActor:
             else:
                 self.active_player_id = 1
 
-    ####################################
-    ### FOR INTERACTIONS WITH CLIENT ###
-    ####################################
+    #####################################
+    ### ACTIVE PLAYER ACTION HANDLERS ###
+    #####################################
 
-    def introduced_board_change(self, board_change: BoardChange):
+    def handle_draw_tile(self):
+        self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
+        drawn_tile = self.tile_pool.draw_random_tile()
+        self.true_racks[self.active_player_id].add_tile(drawn_tile)
+        self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
+
+    def handle_introduced_change(self, board_change: BoardChange):
         if board_change.change_type == BoardChangeType.PLACE:
-            self.place_tile(board_change.tile, board_change.first_position)
+            self.place_tile_on_temporary_board(board_change.tile, board_change.first_position)
 
         elif board_change.change_type == BoardChangeType.MOVE:
             self.temp_board.move_tile(board_change.first_position, board_change.second_position)
 
         elif board_change.change_type == BoardChangeType.REMOVE:
-            self.take_tile_off_board(board_change.first_position)
+            self.take_tile_off_temporary_board(board_change.first_position)
 
         else:
             raise ValueError("Received unexpected board change type: " + board_change.change_type.__str__())
 
         self.server.send_all_except(self.active_player_id, Message(MessageType.CHANGE_INTRODUCED, board_change))
 
+    def handle_revert_changes(self):
+        self.temp_board = deepcopy(self.true_board)
+        self.temp_rack = deepcopy(self.true_racks[self.active_player_id])
+        self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
+        self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
+
+    def handle_confirm_changes(self):
+        def confirmation_approved():
+            self.server.send(self.active_player_id, Message(MessageType.OK, verification_result))
+            self.persist_temporary_elements()
+            self.server.send_all_except(
+                self.active_player_id,
+                Message(MessageType.TRUE_BOARD, self.true_board))
+
+        def confirmation_rejected():
+            self.server.send(self.active_player_id, Message(MessageType.NOT_OK, verification_result))
+
+        verification_result = self.temp_board.verify()
+        if verification_result[0]:
+            confirmation_approved()
+        else:
+            confirmation_rejected()
+        return verification_result
+
+    #########################
+    ### AUXILIARY METHODS ###
+    #########################
+
     def announce_next_turn(self):
         # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
         sleep(1)
         self.server.send_all(Message(MessageType.NEXT_TURN, self.active_player_id))
 
-    ######################################################
-    ### FOR INTERACTIONS WITH temporary BOARD AND RACK ###
-    ######################################################
-
     def persist_temporary_elements(self):
         self.true_board = self.temp_board
         self.true_racks[self.active_player_id] = self.temp_rack
 
-    def place_tile(self, tile: Tile, position: Vector2d):
+    ######################################################
+    ### FOR INTERACTIONS WITH temporary BOARD AND RACK ###
+    ######################################################
+
+    def place_tile_on_temporary_board(self, tile: Tile, position: Vector2d):
         """Place given tile on given position at the temporary board"""
         self.temp_rack.remove_tile(tile)
         self.temp_board.place_tile(tile, position)
 
-    def take_tile_off_board(self, position: Vector2d):
+    def take_tile_off_temporary_board(self, position: Vector2d):
         """Take tile off the temporary board and add it to the temporary rack"""
 
         tile = self.temp_board.take_tile_off(position)

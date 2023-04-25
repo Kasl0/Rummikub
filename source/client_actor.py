@@ -110,13 +110,13 @@ class ClientActor:
 
     def handle_board_change(self, board_change: BoardChange):
         if board_change.change_type == BoardChangeType.PLACE:
-            self.place_tile(board_change.tile, board_change.first_position, False)
+            self.place_tile(board_change.tile, board_change.first_position, remove_from_rack=False)
 
         elif board_change.change_type == BoardChangeType.MOVE:
             self.board.move_tile(board_change.first_position, board_change.second_position)
 
         elif board_change.change_type == BoardChangeType.REMOVE:
-            self.take_tile_off_board(board_change.first_position, False)
+            self.take_tile_off_board(board_change.first_position, add_to_rack=False)
 
         else:
             raise ValueError("Received unexpected board change type: " + board_change.change_type.__str__())
