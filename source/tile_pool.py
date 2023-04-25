@@ -18,6 +18,7 @@ class TilePool:
                 self.__tiles.append(Tile(value, color))
 
         random.shuffle(self.__tiles)
+        print(self)
 
 
     def if_tile_in_pool(self, tile: Tile):
@@ -36,10 +37,7 @@ class TilePool:
         if len(self.__tiles) == 0:
             return None
 
-        tile_to_return = self.__tiles[-1]
-
-        self.remove_tile(tile_to_return)
-        return tile_to_return
+        return self.__tiles.pop()
 
     def remove_tile(self, tile: Tile):
         self.__tiles.remove(tile)
