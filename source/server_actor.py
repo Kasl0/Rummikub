@@ -71,10 +71,7 @@ class ServerActor:
             if self.temp_rack.is_empty():
                 return self.end_main_game(self.active_player_id)
 
-            if self.active_player_id + 1 <= len(self.server.clients):
-                self.active_player_id = self.active_player_id + 1
-            else:
-                self.active_player_id = 1
+            self.active_player_id = self.server.clients.get_next_client_id(self.active_player_id)
 
     #####################################
     ### ACTIVE PLAYER ACTION HANDLERS ###
@@ -139,7 +136,7 @@ class ServerActor:
         self.true_racks[self.active_player_id] = self.temp_rack
 
     def end_main_game(self, client_id: int):
-        winner_username = self.server.get_username(client_id)
+        winner_username = self.server.clients.get_username(client_id)
         self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
         return winner_username
 

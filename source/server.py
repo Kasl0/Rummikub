@@ -1,9 +1,9 @@
 import socket
 import msvcrt
-import random
 import pickle
 
 from message import Message, MessageType
+from client_info_aggregator import ClientInfoAggregator
 
 
 class Server:
@@ -17,21 +17,13 @@ class Server:
         # self.port = 1234
         self.port = int(input("Enter the server port: "))
 
-        # dictionary of clients
-        # keys - assigned client ids
-        # values - arrays of 3 elements: client_socket, client_address, client_username
-        # TODO: move this dictionary and related methods
-        #  [get_username(client_id, get_random_client_id(), get_next_client_id(client_id), get_socket(client_id)]
-        #  to a separate class because they shouldn't be server responsibilities
-        self.clients = {}
-
-        self.next_free_id = 1
-
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.s.bind((self.ip, self.port))  # TCP server has started
         self.s.setblocking(False)  # Waiting for players does not block the server
         self.s.listen()  # TCP server is now listening
+
+        self.clients: ClientInfoAggregator = ClientInfoAggregator()
 
     def start(self):
         """Waits for the players and calls self.__init_game()
@@ -69,41 +61,35 @@ class Server:
         client_socket.settimeout(None)
 
         # add client to the dictionary
-        self.clients[self.next_free_id] = [client_socket, client_address, client_username]
+        assigned_client_id = self.clients.add_client(client_socket, client_address, client_username)
 
         # print new client credentials
-        print("New player:", client_username, client_address, "with assigned ID:", self.next_free_id)
+        print("New player:", client_username, client_address, "with assigned ID:", assigned_client_id)
 
         # send client assigned id
-        self.send(self.next_free_id, Message(MessageType.PLAYER_JOINED, self.next_free_id))
-
-        self.next_free_id += 1
+        self.send(assigned_client_id, Message(MessageType.PLAYER_JOINED, assigned_client_id))
 
     def close(self):
         """Closes all connections and socket itself"""
 
-        for client_id in self.clients.keys():
-            self.clients[client_id][0].close()
+        for client_id in self.clients.get_client_ids():
+            self.clients.get_socket(client_id).close()
         if self.s:
             self.s.close()
 
         print("Closed all connections and socket")
 
     def send(self, client_id, message: Message):
-        """Sends message to the client by the given id."""
-
-        self.clients[client_id][0].sendall(pickle.dumps(message))
+        self.clients.get_socket(client_id).sendall(pickle.dumps(message))
 
     def send_all(self, message: Message):
-        """Sends message to all connected clients."""
-
-        for client_id in self.clients.keys():
+        for client_id in self.clients.get_client_ids():
             self.send(client_id, message)
 
     def send_all_except(self, exempted_client_id, message: Message):
         """Sends message to all connected clients except for the exempted one."""
 
-        for client_id in self.clients.keys():
+        for client_id in self.clients.get_client_ids():
             if client_id != exempted_client_id:
                 self.send(client_id, message)
 
@@ -111,17 +97,6 @@ class Server:
         """Receives message from client with the given id.
         Returns string"""
 
-        message = pickle.loads(self.clients[client_id][0].recv(1024))
+        message = pickle.loads(self.clients.get_socket(client_id).recv(1024))
         print(message)
         return message
-
-    def get_random_client_id(self):
-        """Returns id of random client"""
-
-        return random.choice(list(self.clients.keys()))
-
-    def get_username(self, client_id: int):
-        searched_client = self.clients[client_id]
-        if searched_client is None:
-            return None
-        return searched_client[2]

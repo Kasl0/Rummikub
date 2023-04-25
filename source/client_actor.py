@@ -98,10 +98,7 @@ class ClientActor:
 
             # change your state accordingly
             if message.type == MessageType.NEXT_TURN:
-                if int(message.content) == self.client.id:
-                    self.state = ClientActorState.ACTIVE
-                else:
-                    self.state = ClientActorState.PASSIVE
+                self.state = ClientActorState.ACTIVE if int(message.content) == self.client.id else ClientActorState.PASSIVE
             else:
                 raise ValueError("Received unexpected message: " + message.__str__())
 
