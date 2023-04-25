@@ -67,7 +67,8 @@ class ClientActor:
                       "\tmove <position_from_x> <position_from_y> <position_to_x> <position_to_y>\n"
                       "\tremove <position_x> <position_y>\n"
                       "\trevert\n"
-                      "\tconfirm")
+                      "\tconfirm\n"
+                      "> ")
                 parser = InputParser()
                 if parser.is_draw():    # MessageType.DRAW_TILE
                     self.handle_draw_tile()

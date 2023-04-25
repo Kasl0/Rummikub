@@ -7,7 +7,7 @@ from server_actor import ServerActor
 from tile_pool import TilePool
 
 
-class ServerGame:
+class ServerGameManager:
 	def __init__(self):
 		self.server = Server()
 

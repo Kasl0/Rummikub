@@ -4,7 +4,7 @@ from client import Client
 from client_actor import ClientActor
 
 
-class ClientGame:
+class ClientGameManager:
 	def __init__(self):
 		# client - for communication with server
 		self.client = Client()
