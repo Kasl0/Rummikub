@@ -13,20 +13,17 @@ class Client:
         # client's id (for socket communication)
         self.id = None
 
-        # TODO: revert changes
         # client's username (entered by user)
-        self.username = "Jan"
-        # self.username = input("Enter your username: ")
+        # self.username = "Jan"
+        self.username = input("Enter your username: ")
 
-        # TODO: revert changes
         # server's ip (entered by user)
-        self.ip = "192.168.0.228"
-        # self.ip = input("Enter the server IP: ")
+        # self.ip = "192.168.0.228"
+        self.ip = input("Enter the server IP: ")
 
-        # TODO: revert changes
         # server's port (entered by user)
-        self.port = 1234
-        # self.port = int(input("Enter the server port: "))
+        # self.port = 1234
+        self.port = int(input("Enter the server port: "))
 
     def connect(self):
         """Connects to the socket server, sends client's username,

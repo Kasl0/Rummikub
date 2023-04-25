@@ -14,9 +14,8 @@ class Server:
         self.ip = socket.gethostbyname(self.hostname)
 
         print("Server IP:", self.ip)
-        self.port = 1234
-        # TODO: revert input
-        #self.port = int(input("Enter the server port: "))
+        # self.port = 1234
+        self.port = int(input("Enter the server port: "))
 
         # dictionary of clients
         # keys - assigned client ids

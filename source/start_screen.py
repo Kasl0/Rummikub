@@ -1,10 +1,5 @@
-from client import Client
-from server_game import ServerGame
-from client_game import ClientGame
-import pickle
-
-from board import Board
-from message import MessageType
+from server_game_manager import ServerGameManager
+from client_game_manager import ClientGameManager
 
 
 class StartScreen:
@@ -16,18 +11,14 @@ class StartScreen:
             print("3. For testing purposes only")
             print("4. Exit")
 
-            choice = input("Select option (enter '1', '2', '3' or '4'): ")
+            choice = input("Select option (enter '1', '2' or '3')\n> ")
 
             if choice == "1":
-                ClientGame().play()
+                ClientGameManager().play()
                 break
 
             elif choice == "2":
-                ServerGame().play()
-                break
-
-            elif choice == "3":
-                print(MessageType.JOIN)
+                ServerGameManager().play()
                 break
 
             elif choice == "4":
