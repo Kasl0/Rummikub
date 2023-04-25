@@ -4,7 +4,7 @@ from tile import Tile
 
 
 class Rack:
-    """Respresents player's rack.
+    """Represents player's rack.
 
     Rack aggregates tiles currently owned by the player"""
 
