@@ -21,6 +21,9 @@ class Server:
         # dictionary of clients
         # keys - assigned client ids
         # values - arrays of 3 elements: client_socket, client_address, client_username
+        # TODO: move this dictionary and related methods
+        #  [get_username(client_id, get_random_client_id(), get_next_client_id(client_id), get_socket(client_id)]
+        #  to a separate class because they shouldn't be server responsibilities
         self.clients = {}
 
         self.next_free_id = 1
@@ -117,3 +120,9 @@ class Server:
         """Returns id of random client"""
 
         return random.choice(list(self.clients.keys()))
+
+    def get_username(self, client_id: int):
+        searched_client = self.clients[client_id]
+        if searched_client is None:
+            return None
+        return searched_client[2]
