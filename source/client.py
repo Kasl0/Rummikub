@@ -1,4 +1,7 @@
+import pickle
 import socket
+
+from message import Message, MessageType
 
 
 class Client:
@@ -15,7 +18,7 @@ class Client:
         self.username = input("Enter your username: ")
 
         # server's ip (entered by user)
-        # self.ip = "192.168.1.28"
+        # self.ip = "192.168.0.228"
         self.ip = input("Enter the server IP: ")
 
         # server's port (entered by user)
@@ -30,33 +33,33 @@ class Client:
         self.s.connect((self.ip, self.port))
         print("Connected with the server")
 
-        self.send(self.username)
+        self.send(Message(MessageType.JOIN, self.username))
         print("Username sent")
 
-        self.id = int(self.receive())
+        self.id = int(self.receive().content)
         print("Assigned client ID: ", self.id)
 
     def close_connection(self):
         """Closes connection with the server"""
-
         if self.s:
             self.s.close()
 
         print("Closed connection with the server")
 
-    def send(self, message):
-        """Sends message to the server. Message can be of type str or int"""
+    def send(self, message: Message):
+        """Sends message to the server."""
 
         if self.s and self.s.fileno() != -1:
-            self.s.sendall(str(message).encode())
+            self.s.sendall(pickle.dumps(message))
         else:
             print("Not connected to server.")
 
-    def receive(self):
-        """Receives message from the server.
-        Returns string"""
+    def receive(self) -> Message:
+        """Receives message from the server."""
 
         if self.s and self.s.fileno() != -1:
-            return self.s.recv(1024).decode()
+            message = pickle.loads(self.s.recv(1024))
+            print(message)
+            return message
         else:
             print("Not connected to server.")

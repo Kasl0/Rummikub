@@ -4,7 +4,7 @@ from tile import Tile
 
 
 class Rack:
-    """Respresents player's rack.
+    """Represents player's rack.
 
     Rack aggregates tiles currently owned by the player"""
 
@@ -25,6 +25,9 @@ class Rack:
         """Remove given tile from the rack"""
 
         self.__tiles.remove(tile)
+
+    def is_empty(self) -> bool:
+        return len(self.__tiles) == 0
 
     def __str__(self):
         res = '['
