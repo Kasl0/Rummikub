@@ -1,5 +1,5 @@
-from server_game_manager import ServerGameManager
-from client_game_manager import ClientGameManager
+from ..manager.client_game_manager import ClientGameManager
+from ..manager.server_game_manager import ServerGameManager
 
 
 class StartScreen:

@@ -1,7 +1,7 @@
 from typing import Union
 
-from tile import Tile
-from vector2d import Vector2d
+from ..logic.tile import Tile
+from ..logic.vector2d import Vector2d
 from enum import Enum
 
 

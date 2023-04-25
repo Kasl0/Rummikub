@@ -2,8 +2,8 @@ import socket
 import msvcrt
 import pickle
 
-from message import Message, MessageType
-from client_info_aggregator import ClientInfoAggregator
+from .message import Message, MessageType
+from .client_info_aggregator import ClientInfoAggregator
 
 
 class Server:

@@ -1,10 +1,10 @@
 from typing import Dict
 
-from server import Server
-from rack import Rack
-from message import Message, MessageType
-from server_actor import ServerActor
-from tile_pool import TilePool
+from ..conection.server import Server
+from ..logic.rack import Rack
+from ..conection.message import Message, MessageType
+from .server_actor import ServerActor
+from ..logic.tile_pool import TilePool
 
 
 class ServerGameManager:

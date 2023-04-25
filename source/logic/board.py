@@ -1,6 +1,7 @@
 from typing import Optional
-from tile import Tile
-from vector2d import Vector2d
+
+from .tile import Tile
+from .vector2d import Vector2d
 
 
 class Board:

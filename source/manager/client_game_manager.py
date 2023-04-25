@@ -1,7 +1,7 @@
-from board import Board
-from rack import Rack
-from client import Client
-from client_actor import ClientActor
+from ..logic.board import Board
+from ..logic.rack import Rack
+from ..conection.client import Client
+from .client_actor import ClientActor
 
 
 class ClientGameManager:

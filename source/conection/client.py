@@ -1,7 +1,7 @@
 import pickle
 import socket
 
-from message import Message, MessageType
+from .message import Message, MessageType
 
 
 class Client:

@@ -1,6 +1,4 @@
-from board import Board
-from vector2d import Vector2d
-from tile import Tile
+from .tile import Tile
 
 
 class Rack:

@@ -2,14 +2,14 @@ from copy import deepcopy
 from time import sleep
 from typing import Dict
 
-from board import Board
-from rack import Rack
-from message import MessageType, Message
-from board_change import BoardChange, BoardChangeType
-from server import Server
-from tile_pool import TilePool
-from tile import Tile
-from vector2d import Vector2d
+from ..logic.board import Board
+from ..logic.rack import Rack
+from ..conection.message import MessageType, Message
+from ..conection.board_change import BoardChange, BoardChangeType
+from ..conection.server import Server
+from ..logic.tile_pool import TilePool
+from ..logic.tile import Tile
+from ..logic.vector2d import Vector2d
 
 
 class ServerActor:

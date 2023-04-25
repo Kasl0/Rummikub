@@ -1,4 +1,4 @@
-from start_screen import StartScreen
+from .user_interface.start_screen import StartScreen
 
 
 def main():

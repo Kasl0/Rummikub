@@ -1,8 +1,7 @@
 import random
 
-from color import Color
-from tile import Tile
-from random import randint
+from .color import Color
+from .tile import Tile
 
 
 class TilePool:

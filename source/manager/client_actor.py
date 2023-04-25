@@ -1,11 +1,11 @@
-from board import Board
-from rack import Rack
-from client import Client
-from message import MessageType, Message
-from board_change import BoardChange, BoardChangeType
-from input_parser import InputParser
-from tile import Tile
-from vector2d import Vector2d
+from ..logic.board import Board
+from ..logic.rack import Rack
+from ..conection.client import Client
+from ..conection.message import MessageType, Message
+from ..conection.board_change import BoardChange, BoardChangeType
+from ..user_interface.input_parser import InputParser
+from ..logic.tile import Tile
+from ..logic.vector2d import Vector2d
 from enum import Enum
 
 
