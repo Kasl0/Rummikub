@@ -19,7 +19,7 @@ class ServerGameManager:
 		# value - his rack
 		self.racks: Dict[int, Rack] = {}
 
-		self.winner = None
+		self.winner_client_id = None
 
 	def play(self):
 		"""Go through all game stages:\n
@@ -50,7 +50,7 @@ class ServerGameManager:
 		self.server.send_all(Message(MessageType.GAME_STARTS, "Starting game"))
 
 	def game_initialization(self):
-		for client_id in self.server.clients.keys():
+		for client_id in self.server.clients.get_client_ids():
 			self.racks[client_id] = Rack()
 
 			for i in range(14):
@@ -60,11 +60,11 @@ class ServerGameManager:
 
 	def main_game(self):
 		server_actor = ServerActor(self.racks, self.tile_pool, self.server)
-		self.winner = server_actor.serve_main_game_part()  # enter main part of the game
+		self.winner_client_id = server_actor.serve_main_game_part()  # enter main part of the game
 
 	def end_game(self):
-		print("The winner is: " + str(self.winner))
-		winner_username = self.server.clients[self.winner][2]
-		self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
+		print("The winner is: " + str(self.winner_client_id))
+		winner_client_username = self.server.clients.get_username(self.winner_client_id)
+		self.server.send_all(Message(MessageType.GAME_ENDS, winner_client_username))
 		self.server.close()
 		pass
