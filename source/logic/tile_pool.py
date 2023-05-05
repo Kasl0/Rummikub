@@ -17,7 +17,6 @@ class TilePool:
 
         random.shuffle(self.__tiles)
 
-
     def if_tile_in_pool(self, tile: Tile):
         """Check if given tile is in the pool"""
 

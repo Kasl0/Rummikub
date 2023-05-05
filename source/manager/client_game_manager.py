@@ -1,3 +1,6 @@
+import arcade
+
+from ..client_window import ClientWindow
 from ..logic.board import Board
 from ..logic.rack import Rack
 from ..conection.client import Client
@@ -50,7 +53,12 @@ class ClientGameManager:
 
 	def main_game(self):
 		player = ClientActor(self.board, self.rack, self.client)
-		self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game
+
+		window = ClientWindow(player)
+		window.setup()
+		arcade.run()
+
+		#self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game
 
 	def end_game(self):
 		print("The winner is: " + str(self.winner))
