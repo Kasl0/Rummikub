@@ -48,10 +48,10 @@ class ClientWindow(arcade.Window):
 
         # for tile dragging and gui
         self.tile_list = None
-        self.held_tile = None
 
-        # Original location of a tile we are dragging with the mouse in case they have to go back.
+        self.held_tile = None
         self.held_tile_original_position = None
+
         arcade.set_background_color(arcade.color.AMAZON)
 
     def setup(self):
@@ -64,7 +64,7 @@ class ClientWindow(arcade.Window):
         # they have to go back.
         self.held_tile_original_position = None
 
-        # Sprite list with all the cards, no matter what pile they are in.
+        # sprite list with all the tiles on the screen, no matter where
         self.tile_list = arcade.SpriteList()
 
         # Create every card
@@ -125,7 +125,7 @@ class ClientWindow(arcade.Window):
         # just use one of client_actor's handlers
         self.client_actor.handle_draw_tile()
 
-        # TODO: After calling "handle_draw_card" and "handle_confirm_changes" (if it succeeds) an "enter_passive_state"
+        # TODO: After calling "handle_draw_card" and "handle_confirm_changes" (if it succeeds), an "enter_passive_state"
         #  is automatically called, so we can listen to the active player's changes.
         #  But how will we be able to update the window then? For now it just freezes (because we wait for messages
         #  inside arcade loop, which is supposed to refresh window) and it's not good :(
