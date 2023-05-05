@@ -6,16 +6,17 @@ from .message import Message, MessageType
 from .client_info_aggregator import ClientInfoAggregator
 
 
+def get_server_ip():
+    return socket.gethostbyname(socket.gethostname())
+
+
 class Server:
-    def __init__(self):
+    def __init__(self, port):
 
         self.s = None
-        self.hostname = socket.gethostname()
-        self.ip = socket.gethostbyname(self.hostname)
+        self.ip = get_server_ip()
 
-        print("Server IP:", self.ip)
-        # self.port = 1234
-        self.port = int(input("Enter the server port: "))
+        self.port = port
 
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -24,31 +25,17 @@ class Server:
         self.s.listen()  # TCP server is now listening
 
         self.clients: ClientInfoAggregator = ClientInfoAggregator()
+        self.clients_count = 0
 
-    def start(self):
-        """Waits for the players and calls self.__init_game()
-        when there was an action to start the game"""
+    def check_for_incoming_connections(self):
+        try:
+            # accept a new connection
+            client_socket, client_address = self.s.accept()
+            return self.__handle_new_client(client_socket, client_address)
 
-        print("Game lobby is now open - waiting for players")
-
-        # wait for incoming connections
-        while True:
-
-            # TODO: Make "Start game" button and check if it is pressed in bellow's if statement
-            #  Temporary solution: Game is started when user presses any key
-            #  Works only in cmd outside PyCharm!!!
-            #  In PyCharm msvcrt.kbhit() doesn't detect key press and you can't start a game by any means
-            if msvcrt.kbhit():
-                break
-            else:
-                try:
-                    # accept a new connection
-                    client_socket, client_address = self.s.accept()
-                    self.__handle_new_client(client_socket, client_address)
-
-                except IOError as e:
-                    # handle the case where there are no incoming connections
-                    pass
+        except IOError as e:
+            # handle the case where there are no incoming connections
+            pass
 
     def __handle_new_client(self, client_socket, client_address):
 
@@ -62,12 +49,13 @@ class Server:
 
         # add client to the dictionary
         assigned_client_id = self.clients.add_client(client_socket, client_address, client_username)
-
-        # print new client credentials
-        print("New player:", client_username, client_address, "with assigned ID:", assigned_client_id)
+        self.clients_count += 1
 
         # send client assigned id
         self.send(assigned_client_id, Message(MessageType.PLAYER_JOINED, assigned_client_id))
+
+        # return new client credentials
+        return client_username, client_address, assigned_client_id
 
     def close(self):
         """Closes all connections and socket itself"""
@@ -100,3 +88,6 @@ class Server:
         message = pickle.loads(self.clients.get_socket(client_id).recv(1024))
         print(message)
         return message
+
+    def get_clients_count(self):
+        return self.clients_count

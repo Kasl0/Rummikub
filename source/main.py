@@ -1,8 +1,11 @@
-from .user_interface.start_screen import StartScreen
+import arcade
+
+from .gui.app import App
 
 
 def main():
-    StartScreen()
+    App()
+    arcade.run()
 
 
 if __name__ == '__main__':

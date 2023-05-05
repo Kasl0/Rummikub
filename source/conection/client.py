@@ -5,7 +5,7 @@ from .message import Message, MessageType
 
 
 class Client:
-    def __init__(self):
+    def __init__(self, username, ip, port):
 
         # client's socket
         self.s = None
@@ -13,17 +13,17 @@ class Client:
         # client's id (for socket communication)
         self.id = None
 
-        # client's username (entered by user)
+        # client's username
+        self.username = username
         # self.username = "Jan"
-        self.username = input("Enter your username: ")
 
-        # server's ip (entered by user)
+        # server's ip
+        self.ip = ip
         # self.ip = "192.168.0.228"
-        self.ip = input("Enter the server IP: ")
 
-        # server's port (entered by user)
+        # server's port
+        self.port = port
         # self.port = 1234
-        self.port = int(input("Enter the server port: "))
 
     def connect(self):
         """Connects to the socket server, sends client's username,
@@ -38,6 +38,8 @@ class Client:
 
         self.id = int(self.receive().content)
         print("Assigned client ID: ", self.id)
+
+        self.s.setblocking(False)  # Socket does not block the client app
 
     def close_connection(self):
         """Closes connection with the server"""
@@ -56,10 +58,19 @@ class Client:
 
     def receive(self) -> Message:
         """Receives message from the server."""
+        try:
 
-        if self.s and self.s.fileno() != -1:
-            message = pickle.loads(self.s.recv(1024))
-            print(message)
-            return message
-        else:
-            print("Not connected to server.")
+            if self.s and self.s.fileno() != -1:
+                received_msg = self.s.recv(1024)
+                if received_msg:
+                    message = pickle.loads(received_msg)
+                    print(message)
+                    return message
+                else:
+                    return None
+            else:
+                print("Not connected to server.")
+
+        except IOError as e:
+            # handle the case where there are no incoming messages
+            pass
