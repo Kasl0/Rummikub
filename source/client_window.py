@@ -10,11 +10,11 @@ SCREEN_HEIGHT = 768
 SCREEN_TITLE = "Rummikub"
 
 # Constants for sizing
-TILE_SCALE = 0.4
+TILE_SCALE = 0.6
 
 # How big are the tiles?
-TILE_WIDTH = 140 * TILE_SCALE
-TILE_HEIGHT = 190 * TILE_SCALE
+TILE_WIDTH = 100 * TILE_SCALE
+TILE_HEIGHT = 160 * TILE_SCALE
 
 # How big is the board we'll place the tiles on?
 MAT_PERCENT_OVERSIZE = 1.25
@@ -110,15 +110,27 @@ class ClientWindow(arcade.Window):
                          modifiers: int):
         """ Called when the user presses a mouse button. """
 
-        # If we don't have any cards, who cares
+        # if we don't have any cards, who cares
         if self.held_tile is None:
             return
 
-        # We are no longer holding cards
+        # we are no longer holding cards
         self.held_tile = None
 
+
+        # TODO: temporarily we hardcode actiones that should be performed when dropping card
+        #  When the window becomes more functional, these handlers will be called depending on situation
+
+        # if we want to make some action (draw a tile, place / move / remove tile, revert changes, end our turn)
+        # just use one of client_actor's handlers
         self.client_actor.handle_draw_tile()
-        self.client_actor.enter_passive_state()
+
+        # TODO: After calling "handle_draw_card" and "handle_confirm_changes" (if it succeeds) an "enter_passive_state"
+        #  is automatically called, so we can listen to the active player's changes.
+        #  But how will we be able to update the window then? For now it just freezes (because we wait for messages
+        #  inside arcade loop, which is supposed to refresh window) and it's not good :(
+        #  (should we create separate thread?)
+        #  And how should the window even know, that it should refresh (because the state of the board changed)?
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """

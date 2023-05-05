@@ -82,6 +82,8 @@ class ClientActor:
         self.client.send(Message(MessageType.DRAW_TILE, None))
         self.receive_true_board_and_rack()
 
+        self.enter_passive_state()
+
     def handle_board_change_place(self, tile: Tile, position: Vector2d):
         if self.rack.if_tile_on_rack(tile):
             # introduce change on your own board and rack
@@ -94,12 +96,12 @@ class ClientActor:
         else:
             print("Failed to place tile: " + tile.__str__() + ", player doesn't have on their rack")
 
-    def handle_board_change_move(self, position1: Vector2d, position2: Vector2d):
+    def handle_board_change_move(self, source_position: Vector2d, destined_position: Vector2d):
         # introduce change on your own board
-        self.board.move_tile(position1, position2)
+        self.board.move_tile(source_position, destined_position)
 
         # prepare change for server
-        board_change = BoardChange(BoardChangeType.MOVE, None, position1, position2)
+        board_change = BoardChange(BoardChangeType.MOVE, None, source_position, destined_position)
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
     def handle_board_change_remove(self, position: Vector2d):
@@ -123,6 +125,7 @@ class ClientActor:
             return message.content
         else:
             raise ValueError("Received unexpected message: " + message.__str__())
+
 
     #########################
     ### AUXILIARY METHODS ###
