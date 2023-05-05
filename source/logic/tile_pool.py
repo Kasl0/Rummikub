@@ -16,7 +16,6 @@ class TilePool:
                 self.__tiles.append(Tile(value, color))
 
         random.shuffle(self.__tiles)
-        print(self)
 
 
     def if_tile_in_pool(self, tile: Tile):

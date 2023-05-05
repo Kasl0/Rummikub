@@ -1,11 +1,10 @@
 import arcade
 
-from .gui.window import Window
+from .gui.app import App
 
 
 def main():
-    window = Window()
-    window.setup()
+    App()
     arcade.run()
 
 

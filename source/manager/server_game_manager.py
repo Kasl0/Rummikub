@@ -8,8 +8,8 @@ from ..logic.tile_pool import TilePool
 
 
 class ServerGameManager:
-	def __init__(self):
-		self.server = Server()
+	def __init__(self, port):
+		self.server = Server(port)
 
 		# game initialization
 		self.tile_pool = TilePool()
@@ -46,7 +46,6 @@ class ServerGameManager:
 		return
 
 	def session_initialization(self):
-		self.server.start()  # wait for all players to join
 		self.server.send_all(Message(MessageType.GAME_STARTS, "Starting game"))
 
 	def game_initialization(self):

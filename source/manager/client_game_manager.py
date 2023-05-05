@@ -5,9 +5,9 @@ from .client_actor import ClientActor
 
 
 class ClientGameManager:
-	def __init__(self):
+	def __init__(self, username, ip, port):
 		# client - for communication with server
-		self.client = Client()
+		self.client = Client(username, ip, port)
 
 		# player's board and rack
 		self.board = Board()
@@ -41,7 +41,7 @@ class ClientGameManager:
 
 	def session_initialization(self):
 		self.client.connect()
-		print("Server:", self.client.receive().content)  # Client waits for starting game signal
+		# print("Server:", self.client.receive().content)  # Client waits for starting game signal
 
 	def game_initialization(self):
 		message = self.client.receive()

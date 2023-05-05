@@ -1,36 +1,14 @@
 import arcade
 import arcade.gui
 
-from ..manager.client_game_manager import ClientGameManager
-from ..manager.server_game_manager import ServerGameManager
-
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Rummikub"
+from .client_screen import ClientScreen
+from .server_screen import ServerScreen
 
 
-def on_click_exit(event):
-    """
-    Closes the app.
-    """
-    arcade.exit()
+class StartScreen:
+    def __init__(self, app):
 
-
-class Window(arcade.Window):
-    """
-    Main gui class.
-    """
-
-    def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, resizable=True)
-
-        # --- Required for all code that uses UI element,
-        # a UIManager to handle the UI.
-        self.manager = arcade.gui.UIManager()
-        self.manager.enable()
-
-        # Set background
-        arcade.set_background_color(arcade.color.AMAZON)
+        self.app = app
 
         # Create a vertical BoxGroup to align buttons
         self.v_box = arcade.gui.UIBoxLayout()
@@ -44,6 +22,7 @@ class Window(arcade.Window):
         self.v_box.add(title.with_space_around(bottom=40))
 
         # Create the buttons
+
         button_style = {
             "font_name": "Kenney Future",
             "font_color": arcade.color.LIGHT_GRAY
@@ -60,10 +39,10 @@ class Window(arcade.Window):
 
         join_button.on_click = self.on_click_join
         host_button.on_click = self.on_click_host
-        exit_button.on_click = on_click_exit
+        exit_button.on_click = self.on_click_exit
 
         # Create a widget to hold the v_box widget, that will center the buttons
-        self.manager.add(
+        self.app.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
@@ -71,24 +50,21 @@ class Window(arcade.Window):
         )
 
     def on_click_join(self, event):
-        self.manager.clear()
-        # ClientGameManager().play()
+        """
+        Opens client screen.
+        """
+        self.app.manager.clear()
+        ClientScreen(self.app)
 
     def on_click_host(self, event):
-        self.manager.clear()
-        # ServerGameManager().play()
-
-    def setup(self):
-        """ Set up the game variables. Call to re-start the game. """
-        # Create your sprites and sprite lists here
-        pass
-
-    def on_draw(self):
         """
-        Render the screen.
+        Opens server screen.
         """
+        self.app.manager.clear()
+        ServerScreen(self.app)
 
-        # This command should happen before we start drawing. It will clear
-        # the screen to the background color, and erase what we drew last frame.
-        self.clear()
-        self.manager.draw()
+    def on_click_exit(self, event):
+        """
+        Closes the app.
+        """
+        arcade.exit()
