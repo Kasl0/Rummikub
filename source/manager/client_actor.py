@@ -9,11 +9,6 @@ from ..logic.vector2d import Vector2d
 from enum import Enum
 
 
-class ClientActorState(Enum):
-    ACTIVE = 1,
-    PASSIVE = 2
-
-
 class ClientActor:
     """Represents the player
 
@@ -25,80 +20,43 @@ class ClientActor:
         self.board = board
         self.rack = rack
         self.client = client
-        self.state = ClientActorState.PASSIVE
 
-    def play_main_game_part(self):
-        """ Main game loop. If your turn, perform actions, else listen to changes"""
-        while True:
-            print("Enter passive state")
-            while self.state == ClientActorState.PASSIVE:    # here we receive messages and react adequately
-                print()
-                print(self.rack)
-                print(self.board)
-                message = self.client.receive()
 
-                if message.type == MessageType.CHANGE_INTRODUCED:
-                    self.handle_board_change(message.content)
+#            self.handle_draw_tile()
+#
 
-                elif message.type == MessageType.TRUE_BOARD:
-                    self.board = message.content
+#                self.handle_board_change_place(Tile(parser.get_value(), parser.get_color()), parser.get_position())
 
-                elif message.type == MessageType.NEXT_TURN:
-                    if int(message.content) == self.client.id:
-                        self.state = ClientActorState.ACTIVE
-                        break
+#                self.handle_board_change_move(parser.get_position(), parser.get_position2())
+#                self.handle_board_change_remove(parser.get_position())
 
-                elif message.type == MessageType.GAME_ENDS:
-                    return message.content
+#                self.handle_revert_changes()
+#                response = self.handle_confirm_changes()
+#                if response[0]:
+#                    self.state = ClientActorState.PASSIVE
+#                    break
 
-                else:
-                    raise ValueError("Received unexpected message: " + message.__str__())
-
-            print("Enter active state")
-            while self.state == ClientActorState.ACTIVE:
-                print()
-                print(self.rack)
-                print(self.board)
-
-                #   TODO: For now we choose action from console
-                print("Choose your action:\n"
-                      "\tdraw\n"
-                      "\tplace <position_x> <position_y> <value> <color>\n"
-                      "\tmove <position_from_x> <position_from_y> <position_to_x> <position_to_y>\n"
-                      "\tremove <position_x> <position_y>\n"
-                      "\trevert\n"
-                      "\tconfirm\n"
-                      "> ")
-                parser = InputParser()
-                if parser.is_draw():    # MessageType.DRAW_TILE
-                    self.handle_draw_tile()
-                    break
-
-                elif parser.is_place():    # MessageType.CHANGE_INTRODUCED
-                    self.handle_board_change_place(Tile(parser.get_value(), parser.get_color()), parser.get_position())
-                elif parser.is_move():      # MessageType.CHANGE_INTRODUCED
-                    self.handle_board_change_move(parser.get_position(), parser.get_position2())
-                elif parser.is_remove():    # MessageType.CHANGE_INTRODUCED
-                    self.handle_board_change_remove(parser.get_position())
-
-                elif parser.is_revert():  # MessageType.REVERT_CHANGES:
-                    self.handle_revert_changes()
-                elif parser.is_confirm():  # MessageType.CONFIRM_CHANGES:
-                    response = self.handle_confirm_changes()
-                    if response[0]:
-                        self.state = ClientActorState.PASSIVE
-                        break
-                    else:
-                        print("Board not correct: " + response.__str__())
-                else:
-                    print("Received unexpected action: " + parser.words.__str__())
-
-            # wait for NEXT_TURN
+    def enter_passive_state(self):
+        print("Enter passive state")
+        while True:    # here we receive messages and react adequately
+            print()
+            print(self.rack)
+            print(self.board)
             message = self.client.receive()
 
-            # change your state accordingly
-            if message.type == MessageType.NEXT_TURN:
-                self.state = ClientActorState.ACTIVE if int(message.content) == self.client.id else ClientActorState.PASSIVE
+            if message.type == MessageType.CHANGE_INTRODUCED:
+                self._handle_board_change(message.content)
+
+            elif message.type == MessageType.TRUE_BOARD:
+                self.board = message.content
+
+            elif message.type == MessageType.NEXT_TURN:
+                if int(message.content) == self.client.id:
+                    break
+
+            elif message.type == MessageType.GAME_ENDS:
+                return message.content
+
             else:
                 raise ValueError("Received unexpected message: " + message.__str__())
 
@@ -106,7 +64,7 @@ class ClientActor:
     ### ACTION HANDLERS ###
     #######################
 
-    def handle_board_change(self, board_change: BoardChange):
+    def _handle_board_change(self, board_change: BoardChange):
         if board_change.change_type == BoardChangeType.PLACE:
             self.place_tile(board_change.tile, board_change.first_position, remove_from_rack=False)
 
@@ -124,6 +82,8 @@ class ClientActor:
         self.client.send(Message(MessageType.DRAW_TILE, None))
         self.receive_true_board_and_rack()
 
+        self.enter_passive_state()
+
     def handle_board_change_place(self, tile: Tile, position: Vector2d):
         if self.rack.if_tile_on_rack(tile):
             # introduce change on your own board and rack
@@ -136,12 +96,12 @@ class ClientActor:
         else:
             print("Failed to place tile: " + tile.__str__() + ", player doesn't have on their rack")
 
-    def handle_board_change_move(self, position1: Vector2d, position2: Vector2d):
+    def handle_board_change_move(self, source_position: Vector2d, destined_position: Vector2d):
         # introduce change on your own board
-        self.board.move_tile(position1, position2)
+        self.board.move_tile(source_position, destined_position)
 
         # prepare change for server
-        board_change = BoardChange(BoardChangeType.MOVE, None, position1, position2)
+        board_change = BoardChange(BoardChangeType.MOVE, None, source_position, destined_position)
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
     def handle_board_change_remove(self, position: Vector2d):
@@ -165,6 +125,7 @@ class ClientActor:
             return message.content
         else:
             raise ValueError("Received unexpected message: " + message.__str__())
+
 
     #########################
     ### AUXILIARY METHODS ###
