@@ -1,10 +1,8 @@
-import arcade
-
-from ..client_window import ClientWindow
 from ..logic.board import Board
 from ..logic.rack import Rack
 from ..conection.client import Client
 from .client_actor import ClientActor
+from ..gui.client_actual_game import ClientActualGame
 
 
 class ClientGameManager:
@@ -18,12 +16,12 @@ class ClientGameManager:
 
 		self.winner = None
 
-	def play(self):
-		"""Go through all game stages:\n
+	"""def play(self):
+		"Go through all game stages:\n
 				1. join server,\n
 				2. receive starting tiles,\n
 				3. play main game part,\n
-				4. end game sequence + disconnect from server"""
+				4. end game sequence + disconnect from server"
 
 		print("Connecting with server")
 		self.session_initialization()
@@ -40,25 +38,20 @@ class ClientGameManager:
 		print("Closing connection with server")
 		self.end_game()
 
-		return
+		return"""
 
 	def session_initialization(self):
 		self.client.connect()
-		# print("Server:", self.client.receive().content)  # Client waits for starting game signal
 
-	def game_initialization(self):
-		message = self.client.receive()
-		self.rack = message.content
+	def game_initialization(self, app):
+		self.client.s.setblocking(True)
+		self.rack = self.client.receive().content
 		print("Rack from the server:", self.rack)
+		ClientActualGame(app, self.rack)
 
 	def main_game(self):
 		player = ClientActor(self.board, self.rack, self.client)
-
-		window = ClientWindow(player)
-		window.setup()
-		arcade.run()
-
-		#self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game
+		# self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game
 
 	def end_game(self):
 		print("The winner is: " + str(self.winner))

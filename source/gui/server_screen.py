@@ -20,6 +20,8 @@ class ServerScreen:
 
         self.server_game_manager = None
 
+        self.error_message = False
+
         # Server IP
         ip_text = arcade.gui.UILabel(text="The server IP", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
         self.v_box.add(ip_text.with_space_around(bottom=5))
@@ -56,10 +58,26 @@ class ServerScreen:
 
             # Start game button
             play_button = arcade.gui.UIFlatButton(text="Play", width=200, style=self.button_style)
-            self.v_box.add(play_button.with_space_around(bottom=40))
+            self.v_box.add(play_button.with_space_around(bottom=20))
 
             @play_button.event("on_click")
             def on_click_play(event):
+
+                # check if is there is at least 1 player
+                if self.server_game_manager.server.get_clients_count() == 0:
+
+                    if not self.error_message:
+                        no_enough_text = arcade.gui.UILabel(text="Not enough players", width=500, font_name="Kenney Future", font_size=15, text_color=arcade.color.DARK_RED)
+                        self.v_box.add(no_enough_text.with_space_around(bottom=5))
+                        self.error_message = True
+                    return
+
+                self.v_box.clear()
+
+                started_text = arcade.gui.UILabel(text="Game has started", width=500, font_name="Kenney Future", font_size=20, text_color=arcade.color.SMOKY_BLACK, align="center")
+                self.v_box.add(started_text.with_space_around(bottom=5))
+
+                self.app.remove_update_observer(self)
                 self.server_game_manager.play()
 
             self.server_game_manager = ServerGameManager(int(port_input.text))
@@ -73,6 +91,11 @@ class ServerScreen:
 
         # if new connection was made
         if return_value:
+
+            if self.error_message:
+
+                self.v_box.children.pop(len(self.v_box.children)-1)
+                self.error_message = False
 
             # check if is the first client
             if self.server_game_manager.server.get_clients_count() == 1:

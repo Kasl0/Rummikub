@@ -1,27 +1,19 @@
 import arcade
-
-from source.logic.tile import Color
-from source.manager.client_actor import ClientActor
-from source.tile_sprite import TileSprite
-
-# Screen title and size
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 768
-SCREEN_TITLE = "Rummikub"
+import arcade.gui
 
 # Constants for sizing
 TILE_SCALE = 0.6
 
-# How big are the tiles?
-TILE_WIDTH = 100 * TILE_SCALE
-TILE_HEIGHT = 160 * TILE_SCALE
+# How big are the tiles
+TILE_WIDTH = int(100 * TILE_SCALE)
+TILE_HEIGHT = int(160 * TILE_SCALE)
 
-# How big is the board we'll place the tiles on?
+# How big is the board we'll place the tiles on
 MAT_PERCENT_OVERSIZE = 1.25
 MAT_HEIGHT = int(TILE_HEIGHT * MAT_PERCENT_OVERSIZE)
 MAT_WIDTH = int(TILE_WIDTH * MAT_PERCENT_OVERSIZE)
 
-# How much space do we leave as a gap between the tiles?
+# How much space do we leave as a gap between the tiles
 # Done as a percent of the tile size.
 VERTICAL_MARGIN_PERCENT = 0.10
 HORIZONTAL_MARGIN_PERCENT = 0.10
@@ -32,49 +24,27 @@ BOTTOM_Y = MAT_HEIGHT / 2 + MAT_HEIGHT * VERTICAL_MARGIN_PERCENT
 # The X of where to start putting things on the left side
 START_X = MAT_WIDTH / 2 + MAT_WIDTH * HORIZONTAL_MARGIN_PERCENT
 
-# Card constants
-TILE_VALUES = [i for i in range(1, 14)]
-TILE_COLORS = [Color.Red, Color.Blue, Color.Black, Color.Yellow]
 
+class ClientActualGame:
 
-class ClientWindow(arcade.Window):
-    """ Main application class. """
-
-    def __init__(self, client_actor: ClientActor):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-
-        # for logic
-        self.client_actor = client_actor
-
-        # for tile dragging and gui
-        self.tile_list = None
-
-        self.held_tile = None
-        self.held_tile_original_position = None
-
-        arcade.set_background_color(arcade.color.AMAZON)
-
-    def setup(self):
-        """ Set up the game here. Call this function to restart the game. """
-
-        # List of cards we are dragging with the mouse
-        self.held_tile = None
-
-        # Original location of cards we are dragging with the mouse in case
-        # they have to go back.
-        self.held_tile_original_position = None
-
-        # sprite list with all the tiles on the screen, no matter where
+    def __init__(self, app, rack):
+        self.app = app
+        self.rack = rack
         self.tile_list = arcade.SpriteList()
 
-        # Create every card
-        for tile_color in TILE_COLORS:
-            for tile_value in TILE_VALUES:
-                tile = TileSprite(tile_color, tile_value, TILE_SCALE)
-                tile.position = START_X, BOTTOM_Y
-                self.tile_list.append(tile)
+        self.held_tile = None
+        self.held_tile_original_position = None
 
-        self.client_actor.enter_passive_state()
+        self.app.add_draw_observer(self)
+        self.display_rack()
+
+    def display_rack(self):
+        for i, tile in enumerate(self.rack.get_tiles()):
+            #tile_sprite = arcade.SpriteSolidColor(width=TILE_WIDTH, height=TILE_HEIGHT, color=arcade.color.WHITE_SMOKE)
+            tile_sprite = arcade.Sprite("C:/Users/Kaslo/Desktop/GitHub/Rummikub/resources/images/tile.png", TILE_SCALE, hit_box_algorithm="None")
+            tile_sprite.position = START_X + i * MAT_WIDTH, BOTTOM_Y
+
+            self.tile_list.append(tile_sprite)
 
     def pull_to_top(self, card: arcade.Sprite):
         """ Pull card to top of rendering order (last to render, looks on-top) """
@@ -84,11 +54,8 @@ class ClientWindow(arcade.Window):
         self.tile_list.append(card)
 
     def on_draw(self):
-        """ Render the screen. """
-        # Clear the screen
-        self.clear()
-
-        # Draw the cards
+        self.app.clear()
+        # arcade.start_render()
         self.tile_list.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
@@ -106,8 +73,7 @@ class ClientWindow(arcade.Window):
             # Put on top in drawing order
             self.pull_to_top(self.held_tile)
 
-    def on_mouse_release(self, x: float, y: float, button: int,
-                         modifiers: int):
+    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
         """ Called when the user presses a mouse button. """
 
         # if we don't have any cards, who cares
@@ -123,7 +89,7 @@ class ClientWindow(arcade.Window):
 
         # if we want to make some action (draw a tile, place / move / remove tile, revert changes, end our turn)
         # just use one of client_actor's handlers
-        self.client_actor.handle_draw_tile()
+        # self.client_actor.handle_draw_tile()
 
         # TODO: After calling "handle_draw_card" and "handle_confirm_changes" (if it succeeds), an "enter_passive_state"
         #  is automatically called, so we can listen to the active player's changes.

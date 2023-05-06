@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Dict
 
 from ..conection.server import Server
@@ -37,11 +38,11 @@ class ServerGameManager:
 		print("All starting racks sent")
 
 		print("Main game part starts!")
-		self.main_game()
+		# self.main_game()
 		print("We have a winner")
 
 		print("Closing server")
-		self.end_game()
+		# self.end_game()
 
 		return
 
@@ -49,6 +50,7 @@ class ServerGameManager:
 		self.server.send_all(Message(MessageType.GAME_STARTS, "Starting game"))
 
 	def game_initialization(self):
+		sleep(1)  # TODO: Not very professional (but works)
 		for client_id in self.server.clients.get_client_ids():
 			self.racks[client_id] = Rack()
 

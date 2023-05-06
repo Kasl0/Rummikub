@@ -19,6 +19,8 @@ class ClientScreen:
 
         self.client_game_manager = None
 
+        self.error_message = False
+
         # Client username
         username_text = arcade.gui.UILabel(text="Your username", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
         self.v_box.add(username_text.with_space_around(bottom=5))
@@ -51,16 +53,34 @@ class ClientScreen:
         @connect_button.event("on_click")
         def on_click_connect(event):
             self.client_game_manager = ClientGameManager(username_input.text, ip_input.text, int(port_input.text))
-            self.client_game_manager.session_initialization()
+
+            try:
+                self.client_game_manager.session_initialization()
+            except IOError as e:
+                # handle the case where the connection was not made
+                if not self.error_message:
+                    error_text = arcade.gui.UILabel(text="Connection error", width=400, font_name="Kenney Future", font_size=15, text_color=arcade.color.DARK_RED)
+                    self.v_box.add(error_text.with_space_around(bottom=5))
+                    self.error_message = True
+                return
 
             self.v_box.clear()
+            self.error_message = False
 
-            waiting_text = arcade.gui.UILabel(text="Waiting for game to start...", width=500, font_name="Kenney Future", text_color=arcade.color.SMOKY_BLACK)
+            waiting_text = arcade.gui.UILabel(text="Waiting for game to start...", width=500, font_name="Kenney Future", text_color=arcade.color.SMOKY_BLACK, align="center")
             self.v_box.add(waiting_text.with_space_around(bottom=40))
 
             self.app.add_update_observer(self)
 
     def on_update(self, delta_time: float):
+
+        # checking for incoming messages
         return_value = self.client_game_manager.client.receive()
+
+        # if start message
         if return_value:
-            print("Zaczynamy")
+
+            self.app.remove_update_observer(self)
+            self.v_box.clear()
+
+            self.client_game_manager.game_initialization(self.app)
