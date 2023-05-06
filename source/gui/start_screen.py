@@ -1,8 +1,8 @@
-import arcade
 import arcade.gui
 
 from .client_screen import ClientScreen
 from .server_screen import ServerScreen
+from .constants import *
 
 
 class StartScreen:
@@ -16,30 +16,24 @@ class StartScreen:
         # Create the title
         title = arcade.gui.UILabel(text="Rummikub",
                                    align="center",
-                                   font_size=40,
-                                   font_name="Kenney Future",
-                                   text_color=arcade.color.SMOKY_BLACK)
-        self.v_box.add(title.with_space_around(bottom=40))
+                                   font_size=TITLE_FONT_SIZE,
+                                   font_name=FONT_NAME,
+                                   text_color=MAIN_COLOR)
+        self.v_box.add(title.with_space_around(bottom=BIG_PADDING))
 
         # Create the buttons
+        join_button = arcade.gui.UIFlatButton(text="Join Game", width=BUTTON_WIDTH, style=BUTTON_STYLE)
+        self.v_box.add(join_button.with_space_around(bottom=NORMAL_PADDING))
 
-        button_style = {
-            "font_name": "Kenney Future",
-            "font_color": arcade.color.LIGHT_GRAY
-        }
+        host_button = arcade.gui.UIFlatButton(text="Host Game", width=BUTTON_WIDTH, style=BUTTON_STYLE)
+        self.v_box.add(host_button.with_space_around(bottom=NORMAL_PADDING))
 
-        join_button = arcade.gui.UIFlatButton(text="Join Game", width=200, style=button_style)
-        self.v_box.add(join_button.with_space_around(bottom=20))
+        exit_button = arcade.gui.UIFlatButton(text="Exit", width=BUTTON_WIDTH, style=BUTTON_STYLE)
+        self.v_box.add(exit_button.with_space_around(bottom=NORMAL_PADDING))
 
-        host_button = arcade.gui.UIFlatButton(text="Host Game", width=200, style=button_style)
-        self.v_box.add(host_button.with_space_around(bottom=20))
-
-        exit_button = arcade.gui.UIFlatButton(text="Exit", width=200, style=button_style)
-        self.v_box.add(exit_button.with_space_around(bottom=20))
-
-        join_button.on_click = self.on_click_join
-        host_button.on_click = self.on_click_host
-        exit_button.on_click = self.on_click_exit
+        join_button.on_click = self.__on_click_join
+        host_button.on_click = self.__on_click_host
+        exit_button.on_click = self.__on_click_exit
 
         # Create a widget to hold the v_box widget, that will center the buttons
         self.app.manager.add(
@@ -49,21 +43,21 @@ class StartScreen:
                 child=self.v_box)
         )
 
-    def on_click_join(self, event):
+    def __on_click_join(self, event):
         """
         Opens client screen.
         """
         self.app.manager.clear()
         ClientScreen(self.app)
 
-    def on_click_host(self, event):
+    def __on_click_host(self, event):
         """
         Opens server screen.
         """
         self.app.manager.clear()
         ServerScreen(self.app)
 
-    def on_click_exit(self, event):
+    def __on_click_exit(self, event):
         """
         Closes the app.
         """

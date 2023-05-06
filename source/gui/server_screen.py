@@ -1,16 +1,11 @@
-import arcade
 import arcade.gui
 
 from ..manager.server_game_manager import ServerGameManager
 from ..conection.server import get_server_ip
+from .constants import *
 
 
 class ServerScreen:
-
-    button_style = {
-        "font_name": "Kenney Future",
-        "font_color": arcade.color.LIGHT_GRAY
-    }
 
     def __init__(self, app):
 
@@ -20,23 +15,24 @@ class ServerScreen:
 
         self.server_game_manager = None
 
+        # Boolean attribute that informs whether error message is already displayed or not
         self.error_message = False
 
         # Server IP
-        ip_text = arcade.gui.UILabel(text="The server IP", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
-        self.v_box.add(ip_text.with_space_around(bottom=5))
-        ip = arcade.gui.UILabel(text=get_server_ip(), width=400, font_name="Kenney Future", font_size=20, text_color=arcade.color.SMOKY_BLACK)
-        self.v_box.add(ip.with_space_around(bottom=20))
+        ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        self.v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
+        ip = arcade.gui.UILabel(text=get_server_ip(), font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR)
+        self.v_box.add(ip.with_space_around(bottom=NORMAL_PADDING))
 
         # Server port
-        port_text = arcade.gui.UILabel(text="The server port", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
-        self.v_box.add(port_text.with_space_around(bottom=5))
-        port_input = arcade.gui.UIInputText(text="1234", width=400, font_name="Kenney Future", font_size=20)
-        self.v_box.add(port_input.with_space_around(bottom=20))
+        port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        self.v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
+        port_input = arcade.gui.UIInputText(text="1234", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        self.v_box.add(port_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Start server button
-        start_button = arcade.gui.UIFlatButton(text="Start", width=200, style=self.button_style)
-        self.v_box.add(start_button.with_space_around(bottom=20))
+        start_button = arcade.gui.UIFlatButton(text="Start", width=BUTTON_WIDTH, style=BUTTON_STYLE)
+        self.v_box.add(start_button.with_space_around(bottom=NORMAL_PADDING))
 
         self.app.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -46,45 +42,60 @@ class ServerScreen:
         )
 
         @start_button.event("on_click")
-        def on_click_start(event):
-            # Lobby
-            self.v_box.clear()
+        def __on_click_start(event):
 
-            lobby_text = arcade.gui.UILabel(text="Game lobby is now open", width=500, font_name="Kenney Future", font_size=20, text_color=arcade.color.SMOKY_BLACK)
-            self.v_box.add(lobby_text.with_space_around(bottom=5))
+            # Get port number
 
-            waiting_text = arcade.gui.UILabel(text="Waiting for players...", width=500, font_name="Kenney Future", text_color=arcade.color.SMOKY_BLACK)
-            self.v_box.add(waiting_text.with_space_around(bottom=40))
-
-            # Start game button
-            play_button = arcade.gui.UIFlatButton(text="Play", width=200, style=self.button_style)
-            self.v_box.add(play_button.with_space_around(bottom=20))
-
-            @play_button.event("on_click")
-            def on_click_play(event):
-
-                # check if is there is at least 1 player
-                if self.server_game_manager.server.get_clients_count() == 0:
-
-                    if not self.error_message:
-                        no_enough_text = arcade.gui.UILabel(text="Not enough players", width=500, font_name="Kenney Future", font_size=15, text_color=arcade.color.DARK_RED)
-                        self.v_box.add(no_enough_text.with_space_around(bottom=5))
-                        self.error_message = True
-                    return
-
-                self.v_box.clear()
-
-                started_text = arcade.gui.UILabel(text="Game has started", width=500, font_name="Kenney Future", font_size=20, text_color=arcade.color.SMOKY_BLACK, align="center")
-                self.v_box.add(started_text.with_space_around(bottom=5))
-
-                self.app.remove_update_observer(self)
-                self.server_game_manager.play()
+            # TODO: Verify here whether the server port is correct (is not a number) and if not draw error label
 
             self.server_game_manager = ServerGameManager(int(port_input.text))
 
+            # Start accepting new connections
             self.app.add_update_observer(self)
 
+            # Lobby
+            self.v_box.clear()
+
+            lobby_text = arcade.gui.UILabel(text="Game lobby is now open", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR)
+            self.v_box.add(lobby_text.with_space_around(bottom=TINY_PADDING))
+
+            waiting_text = arcade.gui.UILabel(text="Waiting for players...", font_name=FONT_NAME, text_color=MAIN_COLOR)
+            self.v_box.add(waiting_text.with_space_around(bottom=BIG_PADDING))
+
+            # Start game button
+            play_button = arcade.gui.UIFlatButton(text="Play", width=BUTTON_WIDTH, style=BUTTON_STYLE)
+            self.v_box.add(play_button.with_space_around(bottom=NORMAL_PADDING))
+
+            @play_button.event("on_click")
+            def __on_click_play(event):
+
+                # Check if is there is at least 1 player
+                if self.server_game_manager.server.get_clients_count() == 0:
+
+                    # If there are not enough players, draw error label
+                    if not self.error_message:
+                        no_enough_text = arcade.gui.UILabel(text="Not enough players", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE, text_color=ERROR_COLOR)
+                        self.v_box.add(no_enough_text.with_space_around(bottom=TINY_PADDING))
+                        self.error_message = True
+                    return
+
+                # Stop accepting new connections
+                self.app.remove_update_observer(self)
+
+                # Clear the screen and draw label about started game
+                self.v_box.clear()
+
+                started_text = arcade.gui.UILabel(text="Game has started", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR, align="center")
+                self.v_box.add(started_text.with_space_around(bottom=TINY_PADDING))
+
+                # Start the game
+                self.server_game_manager.play()
+
     def on_update(self, delta_time: float):
+        """
+            Called every game frame.
+            Checks for incoming connections and if there is a new one, adds new player to the game lobby.
+        """
 
         # checking for incoming connections
         return_value = self.server_game_manager.server.check_for_incoming_connections()
@@ -94,17 +105,18 @@ class ServerScreen:
 
             if self.error_message:
 
+                # Remove error message label
                 self.v_box.children.pop(len(self.v_box.children)-1)
                 self.error_message = False
 
-            # check if is the first client
+            # check if new connection is the first one
             if self.server_game_manager.server.get_clients_count() == 1:
 
                 # draw label for connected clients
-                connected_text = arcade.gui.UILabel(text="Connected players:", width=500, font_name="Kenney Future", text_color=arcade.color.SMOKY_BLACK)
-                self.v_box.add(connected_text.with_space_around(bottom=10))
+                connected_text = arcade.gui.UILabel(text="Connected players:", font_name=FONT_NAME, text_color=MAIN_COLOR)
+                self.v_box.add(connected_text.with_space_around(bottom=SMALL_PADDING))
 
             # add new client label
             client_username, client_address, assigned_client_id = return_value
-            new_client_text = arcade.gui.UILabel(text=client_username, width=500, font_name="Kenney Future", text_color=arcade.color.SMOKY_BLACK, font_size=20)
-            self.v_box.add(new_client_text.with_space_around(bottom=10))
+            new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
+            self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))

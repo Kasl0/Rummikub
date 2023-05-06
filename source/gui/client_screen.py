@@ -1,15 +1,10 @@
-import arcade
 import arcade.gui
 
 from ..manager.client_game_manager import ClientGameManager
+from .constants import *
 
 
 class ClientScreen:
-
-    button_style = {
-        "font_name": "Kenney Future",
-        "font_color": arcade.color.LIGHT_GRAY
-    }
 
     def __init__(self, app):
 
@@ -19,29 +14,30 @@ class ClientScreen:
 
         self.client_game_manager = None
 
+        # Boolean attribute that informs whether error message is already displayed or not
         self.error_message = False
 
         # Client username
-        username_text = arcade.gui.UILabel(text="Your username", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
-        self.v_box.add(username_text.with_space_around(bottom=5))
-        username_input = arcade.gui.UIInputText(text="Guest", width=400, font_name="Kenney Future", font_size=20)
-        self.v_box.add(username_input.with_space_around(bottom=20))
+        username_text = arcade.gui.UILabel(text="Your username", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        self.v_box.add(username_text.with_space_around(bottom=TINY_PADDING))
+        username_input = arcade.gui.UIInputText(text="Guest", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        self.v_box.add(username_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Server IP
-        ip_text = arcade.gui.UILabel(text="The server IP", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
-        self.v_box.add(ip_text.with_space_around(bottom=5))
-        ip_input = arcade.gui.UIInputText(text="192.168.1.28", width=400, font_name="Kenney Future", font_size=20)
-        self.v_box.add(ip_input.with_space_around(bottom=20))
+        ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        self.v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
+        ip_input = arcade.gui.UIInputText(text="192.168.1.28", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        self.v_box.add(ip_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Server port
-        port_text = arcade.gui.UILabel(text="The server port", width=400, font_name="Kenney Future", text_color=arcade.color.LIGHT_GRAY)
-        self.v_box.add(port_text.with_space_around(bottom=5))
-        port_input = arcade.gui.UIInputText(text="1234", width=400, font_name="Kenney Future", font_size=20)
-        self.v_box.add(port_input.with_space_around(bottom=20))
+        port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        self.v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
+        port_input = arcade.gui.UIInputText(text="1234", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        self.v_box.add(port_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Connect button
-        connect_button = arcade.gui.UIFlatButton(text="Connect", width=200, style=self.button_style)
-        self.v_box.add(connect_button.with_space_around(bottom=20))
+        connect_button = arcade.gui.UIFlatButton(text="Connect", width=BUTTON_WIDTH, style=BUTTON_STYLE)
+        self.v_box.add(connect_button.with_space_around(bottom=NORMAL_PADDING))
 
         self.app.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -51,36 +47,58 @@ class ClientScreen:
         )
 
         @connect_button.event("on_click")
-        def on_click_connect(event):
+        def __on_click_connect(event):
+
+            # Get username, server IP and port
+
+            # TODO: Verify here whether the server IP is correct
+            #  (is string with correct structure: 4 numbers 0-255 and 3 dots between them, no spaces)
+            #  and if not draw error label
+
+            # TODO: Verify here whether the server port is correct (is not a number) and if not draw error label
+
             self.client_game_manager = ClientGameManager(username_input.text, ip_input.text, int(port_input.text))
 
             try:
                 self.client_game_manager.session_initialization()
+
+            # handle the case where the connection was not made
             except IOError as e:
-                # handle the case where the connection was not made
+
+                # If connection was not made, draw error label
                 if not self.error_message:
-                    error_text = arcade.gui.UILabel(text="Connection error", width=400, font_name="Kenney Future", font_size=15, text_color=arcade.color.DARK_RED)
-                    self.v_box.add(error_text.with_space_around(bottom=5))
+                    error_text = arcade.gui.UILabel(text="Connection error", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE, text_color=ERROR_COLOR)
+                    self.v_box.add(error_text.with_space_around(bottom=TINY_PADDING))
                     self.error_message = True
                 return
 
+            # Clear the screen and draw label about waiting for game start
             self.v_box.clear()
             self.error_message = False
 
-            waiting_text = arcade.gui.UILabel(text="Waiting for game to start...", width=500, font_name="Kenney Future", text_color=arcade.color.SMOKY_BLACK, align="center")
-            self.v_box.add(waiting_text.with_space_around(bottom=40))
+            waiting_text = arcade.gui.UILabel(text="Waiting for game to start...", font_name=FONT_NAME, text_color=MAIN_COLOR, align="center")
+            self.v_box.add(waiting_text.with_space_around(bottom=BIG_PADDING))
 
+            # Start checking for game start message
             self.app.add_update_observer(self)
 
     def on_update(self, delta_time: float):
+        """
+            Called every game frame.
+            Checks for incoming game start message
+        """
 
-        # checking for incoming messages
+        # checking for game start message
         return_value = self.client_game_manager.client.receive()
 
         # if start message
         if return_value:
 
+            # Stop checking for game start message
             self.app.remove_update_observer(self)
+
+            # Clear the screen
             self.v_box.clear()
 
+            # Initialise the game
             self.client_game_manager.game_initialization(self.app)

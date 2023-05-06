@@ -40,8 +40,8 @@ class ClientActualGame:
 
     def display_rack(self):
         for i, tile in enumerate(self.rack.get_tiles()):
-            #tile_sprite = arcade.SpriteSolidColor(width=TILE_WIDTH, height=TILE_HEIGHT, color=arcade.color.WHITE_SMOKE)
-            tile_sprite = arcade.Sprite("C:/Users/Kaslo/Desktop/GitHub/Rummikub/resources/images/tile.png", TILE_SCALE, hit_box_algorithm="None")
+            tile_sprite = arcade.SpriteSolidColor(width=TILE_WIDTH, height=TILE_HEIGHT, color=arcade.color.WHITE_SMOKE)
+            # tile_sprite = arcade.Sprite("../../resources/images/tile.png", TILE_SCALE, hit_box_algorithm="None")
             tile_sprite.position = START_X + i * MAT_WIDTH, BOTTOM_Y
 
             self.tile_list.append(tile_sprite)
@@ -82,7 +82,6 @@ class ClientActualGame:
 
         # we are no longer holding cards
         self.held_tile = None
-
 
         # TODO: temporarily we hardcode actiones that should be performed when dropping card
         #  When the window becomes more functional, these handlers will be called depending on situation

@@ -7,6 +7,9 @@ from .client_info_aggregator import ClientInfoAggregator
 
 
 def get_server_ip():
+    """
+        Returns local IP.
+    """
     return socket.gethostbyname(socket.gethostname())
 
 
@@ -90,4 +93,7 @@ class Server:
         return message
 
     def get_clients_count(self):
+        """
+            Returns number of connected clients.
+        """
         return self.clients_count
