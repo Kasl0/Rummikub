@@ -2,7 +2,7 @@ import arcade.gui
 
 from ..manager.server_game_manager import ServerGameManager
 from ..conection.server import get_server_ip
-from .constants import *
+from .ui_constants import *
 
 
 class ServerView(arcade.View):

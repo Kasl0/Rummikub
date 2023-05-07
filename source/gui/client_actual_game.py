@@ -1,32 +1,8 @@
 import arcade
 import arcade.gui
 
+from .game_constants import *
 from .tile_sprite import TileSprite
-
-# Constants for sizing
-TILE_SCALE = 0.6
-
-# How big are the tiles
-TILE_WIDTH = 100 * TILE_SCALE
-TILE_HEIGHT = 160 * TILE_SCALE
-
-TILE_CORNER_RADIUS = 10
-
-# How big is the board we'll place the tiles on
-MAT_PERCENT_OVERSIZE = 1.25
-MAT_HEIGHT = int(TILE_HEIGHT * MAT_PERCENT_OVERSIZE)
-MAT_WIDTH = int(TILE_WIDTH * MAT_PERCENT_OVERSIZE)
-
-# How much space do we leave as a gap between the tiles
-# Done as a percent of the tile size.
-VERTICAL_MARGIN_PERCENT = 0.10
-HORIZONTAL_MARGIN_PERCENT = 0.10
-
-# The Y of the bottom row (2 piles)
-BOTTOM_Y = MAT_HEIGHT / 2 + MAT_HEIGHT * VERTICAL_MARGIN_PERCENT
-
-# The X of where to start putting things on the left side
-START_X = MAT_WIDTH / 2 + MAT_WIDTH * HORIZONTAL_MARGIN_PERCENT
 
 
 class ClientActualGame(arcade.View):
@@ -44,7 +20,7 @@ class ClientActualGame(arcade.View):
     def display_rack(self):
 
         for i, tile in enumerate(self.rack.get_tiles()):
-            tile_sprite = TileSprite(arcade.color.RED, tile.value, TILE_WIDTH, TILE_HEIGHT, START_X + i * MAT_WIDTH, BOTTOM_Y)
+            tile_sprite = TileSprite(tile, START_X + i * MAT_WIDTH, BOTTOM_Y)
             self.tile_list.append(tile_sprite)
 
     def pull_to_top(self, card):
@@ -90,10 +66,6 @@ class ClientActualGame(arcade.View):
 
         # TODO: After calling "handle_draw_card" and "handle_confirm_changes" (if it succeeds), an "enter_passive_state"
         #  is automatically called, so we can listen to the active player's changes.
-        #  But how will we be able to update the window then? For now it just freezes (because we wait for messages
-        #  inside arcade loop, which is supposed to refresh window) and it's not good :(
-        #  (should we create separate thread?)
-        #  And how should the window even know, that it should refresh (because the state of the board changed)?
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """

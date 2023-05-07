@@ -2,7 +2,7 @@ import arcade.gui
 
 from .client_view import ClientView
 from .server_view import ServerView
-from .constants import *
+from .ui_constants import *
 
 
 class StartScreen(arcade.View):

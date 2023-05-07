@@ -1,7 +1,7 @@
 import arcade.gui
 
 from ..manager.client_game_manager import ClientGameManager
-from .constants import *
+from .ui_constants import *
 
 
 class ClientView(arcade.View):

@@ -1,7 +1,7 @@
 import arcade.gui
 
 from .start_screen import StartScreen
-from .constants import *
+from .ui_constants import *
 
 
 class App(arcade.Window):
