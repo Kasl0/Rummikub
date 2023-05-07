@@ -2,26 +2,74 @@ import arcade
 import arcade.gui
 
 from .game_constants import *
-from .tile_sprite import TileSprite
+from .tile_sprite import TileSprite, draw_rounded_rectangle_filled
+from ..logic.vector2d import Vector2d
 
 
 class ClientActualGame(arcade.View):
 
-    def __init__(self, rack):
-        super().__init__()
-        self.rack = rack
-        self.tile_list = []
+    def __init__(self, client_actor):
 
+        super().__init__()
+        self.player = client_actor
+
+        self.gui = None
+
+        self.tile_list = []
         self.held_tile = None
         self.held_tile_original_position = None
 
+        self.display_board()
         self.display_rack()
+
+    def display_board(self):
+
+        # Get window dimensions
+        screen_width, screen_height = self.window.get_size()
+
+        self.gui = arcade.ShapeElementList()
+
+        # Draw board grid
+        board_grid = arcade.create_rectangle_filled(BOARD_WIDTH / 2, screen_height - BOARD_HEIGHT / 2, BOARD_WIDTH, BOARD_HEIGHT, BOARD_GRID_COLOR)
+        self.gui.append(board_grid)
+
+        # Display tiles on board or empty space with background color
+        for row in range(BOARD_ROW_COUNT):
+            for column in range(BOARD_COLUMN_COUNT):
+
+                x = MAT_WIDTH * column + MAT_WIDTH / 2
+                y = screen_height - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
+
+                tile = self.player.board.tile_at(Vector2d(column, row))
+
+                if tile:
+                    current_cell = TileSprite(tile, x, y)
+                    self.tile_list.append(current_cell)
+                else:
+                    current_cell = arcade.create_rectangle_filled(x, y, TILE_WIDTH, TILE_HEIGHT, BOARD_BACKGROUND_COLOR)
+                    self.gui.append(current_cell)
 
     def display_rack(self):
 
-        for i, tile in enumerate(self.rack.get_tiles()):
-            tile_sprite = TileSprite(tile, START_X + i * MAT_WIDTH, BOTTOM_Y)
-            self.tile_list.append(tile_sprite)
+        # Draw rack background
+        rack_background = arcade.create_rectangle_filled(RACK_WIDTH / 2, RACK_HEIGHT / 2, RACK_WIDTH, RACK_HEIGHT, RACK_COLOR)
+        self.gui.append(rack_background)
+
+        tiles = self.player.rack.get_tiles()
+        current_tile = 0
+
+        # Display tiles on rack
+        for row in range(RACK_ROW_COUNT):
+            for column in range(RACK_COLUMN_COUNT):
+
+                x = MAT_WIDTH * column + MAT_WIDTH / 2
+                y = MAT_HEIGHT * row + MAT_HEIGHT / 2
+
+                if current_tile < len(tiles):
+                    current_cell = TileSprite(tiles[current_tile], x, y)
+                    current_tile += 1
+
+                    self.tile_list.append(current_cell)
 
     def pull_to_top(self, card):
         """ Pull card to top of rendering order (last to render, looks on-top) """
@@ -33,7 +81,8 @@ class ClientActualGame(arcade.View):
     def on_draw(self):
         arcade.start_render()
 
-        # Draw the cards
+        self.gui.draw()
+
         for card in self.tile_list:
             card.draw()
 

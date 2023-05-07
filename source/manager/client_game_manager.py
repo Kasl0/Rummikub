@@ -48,11 +48,11 @@ class ClientGameManager:
 		self.client.s.settimeout(5)
 		self.rack = self.client.receive().content
 		print("Rack from the server:", self.rack)
-		return ClientActualGame(self.rack)
+		return ClientActualGame(ClientActor(self.board, self.rack, self.client))
 
-	def main_game(self):
+	"""def main_game(self):
 		player = ClientActor(self.board, self.rack, self.client)
-		# self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game
+		# self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game"""
 
 	def end_game(self):
 		print("The winner is: " + str(self.winner))

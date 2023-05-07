@@ -1,7 +1,7 @@
 import arcade.gui
 
 from .start_screen import StartScreen
-from .ui_constants import *
+from .ui_constants import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, BACKGROUND_COLOR
 
 
 class App(arcade.Window):

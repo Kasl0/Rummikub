@@ -1,28 +1,43 @@
 from arcade import color
 
 # Constants for sizing
-TILE_SCALE = 0.6
+SCALE = 0.5
 
 # How big are the tiles
-TILE_WIDTH = 100 * TILE_SCALE
-TILE_HEIGHT = 160 * TILE_SCALE
+TILE_WIDTH = 100 * SCALE
+TILE_HEIGHT = 160 * SCALE
+TILE_FONT_SIZE = 60 * SCALE
 
-TILE_CORNER_RADIUS = 10
+TILE_CORNER_RADIUS = 10 * SCALE
 
-TILE_BACKGROUND_COLOR = color.BEIGE
+TILE_BACKGROUND_COLOR = color.BABY_POWDER
 
-# How big is the board we'll place the tiles on
-MAT_PERCENT_OVERSIZE = 1.25
+# How big are the board cells we'll place the tiles on
+MAT_PERCENT_OVERSIZE = 1.05
 MAT_HEIGHT = TILE_HEIGHT * MAT_PERCENT_OVERSIZE
 MAT_WIDTH = TILE_WIDTH * MAT_PERCENT_OVERSIZE
 
-# How much space do we leave as a gap between the tiles
-# Done as a percent of the tile size.
-VERTICAL_MARGIN_PERCENT = 0.10
-HORIZONTAL_MARGIN_PERCENT = 0.10
 
-# The Y of the bottom row (2 piles)
-BOTTOM_Y = MAT_HEIGHT / 2 + MAT_HEIGHT * VERTICAL_MARGIN_PERCENT
+# Set how many board rows and columns we will have
+BOARD_ROW_COUNT = 8
+BOARD_COLUMN_COUNT = 22
 
-# The X of where to start putting things on the left side
-START_X = MAT_WIDTH / 2 + MAT_WIDTH * HORIZONTAL_MARGIN_PERCENT
+BOARD_HEIGHT = BOARD_ROW_COUNT * MAT_HEIGHT
+BOARD_WIDTH = BOARD_COLUMN_COUNT * MAT_WIDTH
+
+# Set board colors
+BOARD_GRID_COLOR = color.CHARLESTON_GREEN
+BOARD_BACKGROUND_COLOR = color.BLUE_SAPPHIRE
+
+# Set gap between board and rack
+GAP = 100 * SCALE
+
+# Set how many rack rows and columns we will have
+RACK_ROW_COUNT = 2
+RACK_COLUMN_COUNT = 15
+
+RACK_HEIGHT = RACK_ROW_COUNT * MAT_HEIGHT
+RACK_WIDTH = RACK_COLUMN_COUNT * MAT_WIDTH
+
+# Set rack color
+RACK_COLOR = color.COFFEE

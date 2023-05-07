@@ -44,7 +44,7 @@ class TileSprite:
         draw_rounded_rectangle_filled(self.x, self.y, TILE_WIDTH, TILE_HEIGHT, TILE_CORNER_RADIUS, TILE_BACKGROUND_COLOR)
 
         # Draw the value on the tile
-        arcade.draw_text(str(self.value), self.x, self.y + TILE_HEIGHT/7, self.color, font_size=30, anchor_x="center", anchor_y="center", bold=True)
+        arcade.draw_text(str(self.value), self.x, self.y + TILE_HEIGHT/7, self.color, font_size=TILE_FONT_SIZE, anchor_x="center", anchor_y="center", bold=True)
 
     def is_hovering(self, x, y):
         # Check if the mouse pointer is hovering over the tile
