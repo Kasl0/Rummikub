@@ -15,6 +15,9 @@ class ClientActualGame(arcade.View):
 
         self.gui = None
 
+        # Get window dimensions
+        self.screen_width, self.screen_height = self.window.get_size()
+
         self.tile_list = []
         self.held_tile = None
         self.held_tile_original_position = None
@@ -24,13 +27,10 @@ class ClientActualGame(arcade.View):
 
     def display_board(self):
 
-        # Get window dimensions
-        screen_width, screen_height = self.window.get_size()
-
         self.gui = arcade.ShapeElementList()
 
         # Draw board grid
-        board_grid = arcade.create_rectangle_filled(BOARD_WIDTH / 2, screen_height - BOARD_HEIGHT / 2, BOARD_WIDTH, BOARD_HEIGHT, BOARD_GRID_COLOR)
+        board_grid = arcade.create_rectangle_filled(BOARD_WIDTH / 2, self.screen_height - BOARD_HEIGHT / 2, BOARD_WIDTH, BOARD_HEIGHT, BOARD_GRID_COLOR)
         self.gui.append(board_grid)
 
         # Display tiles on board or empty space with background color
@@ -38,7 +38,7 @@ class ClientActualGame(arcade.View):
             for column in range(BOARD_COLUMN_COUNT):
 
                 x = MAT_WIDTH * column + MAT_WIDTH / 2
-                y = screen_height - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
+                y = self.screen_height - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
 
                 tile = self.player.board.tile_at(Vector2d(column, row))
 
@@ -48,6 +48,28 @@ class ClientActualGame(arcade.View):
                 else:
                     current_cell = arcade.create_rectangle_filled(x, y, TILE_WIDTH, TILE_HEIGHT, BOARD_BACKGROUND_COLOR)
                     self.gui.append(current_cell)
+
+    def board_is_hovering(self, x, y):
+        """
+            Checks if (x,y) is hovering over the board.
+            If yes, returns cell position (Vector2d) on the board over which is hovering, else None.
+        """
+
+        if not 0 < x < BOARD_WIDTH:
+            return None
+        if not self.screen_height - BOARD_HEIGHT < y < self.screen_height:
+            return None
+
+        for row in range(BOARD_ROW_COUNT):
+            for column in range(BOARD_COLUMN_COUNT):
+
+                cell_x = MAT_WIDTH * column + MAT_WIDTH / 2
+                cell_y = self.screen_height - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
+
+                if abs(cell_x - x) < MAT_WIDTH / 2 and abs(cell_y - y) < MAT_HEIGHT / 2:
+                    return Vector2d(column, row)
+
+        return None
 
     def display_rack(self):
 
@@ -83,8 +105,8 @@ class ClientActualGame(arcade.View):
 
         self.gui.draw()
 
-        for card in self.tile_list:
-            card.draw()
+        for tile in self.tile_list:
+            tile.draw()
 
         arcade.finish_render()
 
@@ -92,10 +114,11 @@ class ClientActualGame(arcade.View):
         """ Called when the user presses a mouse button. """
 
         # Check if the mouse press is on a card
-        for card in self.tile_list:
-            if card.is_hovering(x, y):
-                card.start_dragging()
-                self.held_tile = card
+        for tile in self.tile_list:
+            if tile.is_hovering(x, y):
+                tile.start_dragging()
+                self.held_tile = tile
+                self.held_tile_original_position = (tile.x, tile.y)
                 break
 
     def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
@@ -103,7 +126,21 @@ class ClientActualGame(arcade.View):
 
         # Stop dragging the selected card
         if self.held_tile:
+
             self.held_tile.stop_dragging()
+
+            position = self.board_is_hovering(x, y)
+
+            if position:
+                self.held_tile.x = MAT_WIDTH * position.x + MAT_WIDTH / 2
+                self.held_tile.y = self.screen_height - (MAT_HEIGHT * position.y + MAT_HEIGHT / 2)
+
+            else:
+                # if cannot place tile, return it to original position
+                x_original, y_original = self.held_tile_original_position
+                self.held_tile.x = x_original
+                self.held_tile.y = y_original
+
             self.held_tile = None
 
         # TODO: temporarily we hardcode actiones that should be performed when dropping card
