@@ -1,12 +1,16 @@
 import arcade
 import arcade.gui
 
+from .tile_sprite import TileSprite
+
 # Constants for sizing
 TILE_SCALE = 0.6
 
 # How big are the tiles
-TILE_WIDTH = int(100 * TILE_SCALE)
-TILE_HEIGHT = int(160 * TILE_SCALE)
+TILE_WIDTH = 100 * TILE_SCALE
+TILE_HEIGHT = 160 * TILE_SCALE
+
+TILE_CORNER_RADIUS = 10
 
 # How big is the board we'll place the tiles on
 MAT_PERCENT_OVERSIZE = 1.25
@@ -25,28 +29,25 @@ BOTTOM_Y = MAT_HEIGHT / 2 + MAT_HEIGHT * VERTICAL_MARGIN_PERCENT
 START_X = MAT_WIDTH / 2 + MAT_WIDTH * HORIZONTAL_MARGIN_PERCENT
 
 
-class ClientActualGame:
+class ClientActualGame(arcade.View):
 
-    def __init__(self, app, rack):
-        self.app = app
+    def __init__(self, rack):
+        super().__init__()
         self.rack = rack
-        self.tile_list = arcade.SpriteList()
+        self.tile_list = []
 
         self.held_tile = None
         self.held_tile_original_position = None
 
-        self.app.add_draw_observer(self)
         self.display_rack()
 
     def display_rack(self):
-        for i, tile in enumerate(self.rack.get_tiles()):
-            tile_sprite = arcade.SpriteSolidColor(width=TILE_WIDTH, height=TILE_HEIGHT, color=arcade.color.WHITE_SMOKE)
-            # tile_sprite = arcade.Sprite("../../resources/images/tile.png", TILE_SCALE, hit_box_algorithm="None")
-            tile_sprite.position = START_X + i * MAT_WIDTH, BOTTOM_Y
 
+        for i, tile in enumerate(self.rack.get_tiles()):
+            tile_sprite = TileSprite(arcade.color.RED, tile.value, TILE_WIDTH, TILE_HEIGHT, START_X + i * MAT_WIDTH, BOTTOM_Y)
             self.tile_list.append(tile_sprite)
 
-    def pull_to_top(self, card: arcade.Sprite):
+    def pull_to_top(self, card):
         """ Pull card to top of rendering order (last to render, looks on-top) """
 
         # Remove, and append to the end
@@ -54,34 +55,31 @@ class ClientActualGame:
         self.tile_list.append(card)
 
     def on_draw(self):
-        self.app.clear()
-        # arcade.start_render()
-        self.tile_list.draw()
+        arcade.start_render()
+
+        # Draw the cards
+        for card in self.tile_list:
+            card.draw()
+
+        arcade.finish_render()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
 
-        # Get list of cards we've clicked on
-        tiles = arcade.get_sprites_at_point((x, y), self.tile_list)
-
-        # Have we clicked on some tiles?
-        if len(tiles) > 0:
-            # All other cases, grab the face-up card we are clicking on
-            self.held_tile = tiles[0]
-            # Save the position
-            self.held_tile_original_position = self.held_tile.position
-            # Put on top in drawing order
-            self.pull_to_top(self.held_tile)
+        # Check if the mouse press is on a card
+        for card in self.tile_list:
+            if card.is_hovering(x, y):
+                card.start_dragging()
+                self.held_tile = card
+                break
 
     def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
         """ Called when the user presses a mouse button. """
 
-        # if we don't have any cards, who cares
-        if self.held_tile is None:
-            return
-
-        # we are no longer holding cards
-        self.held_tile = None
+        # Stop dragging the selected card
+        if self.held_tile:
+            self.held_tile.stop_dragging()
+            self.held_tile = None
 
         # TODO: temporarily we hardcode actiones that should be performed when dropping card
         #  When the window becomes more functional, these handlers will be called depending on situation
@@ -100,6 +98,6 @@ class ClientActualGame:
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """
 
-        if self.held_tile is not None:
-            self.held_tile.center_x += dx
-            self.held_tile.center_y += dy
+        # Update the position of the selected card when dragging
+        if self.held_tile:
+            self.held_tile.update_position(x, y)

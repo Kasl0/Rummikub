@@ -5,17 +5,21 @@ from ..conection.server import get_server_ip
 from .constants import *
 
 
-class ServerScreen:
+class ServerView(arcade.View):
 
     def __init__(self, app):
 
+        super().__init__()
         self.app = app
         self.v_box = arcade.gui.UIBoxLayout()
         self.v_box.align = "left"
 
         self.server_game_manager = None
 
-        # Boolean attribute that informs whether error message is already displayed or not
+        # Boolean attribute that informs whether game has already started
+        self.started = False
+
+        # Boolean attribute that informs whether error message is already displayed
         self.error_message = False
 
         # Server IP
@@ -50,9 +54,6 @@ class ServerScreen:
 
             self.server_game_manager = ServerGameManager(int(port_input.text))
 
-            # Start accepting new connections
-            self.app.add_update_observer(self)
-
             # Lobby
             self.v_box.clear()
 
@@ -79,8 +80,7 @@ class ServerScreen:
                         self.error_message = True
                     return
 
-                # Stop accepting new connections
-                self.app.remove_update_observer(self)
+                self.started = True
 
                 # Clear the screen and draw label about started game
                 self.v_box.clear()
@@ -98,25 +98,26 @@ class ServerScreen:
         """
 
         # checking for incoming connections
-        return_value = self.server_game_manager.server.check_for_incoming_connections()
+        if self.server_game_manager and not self.started:
+            return_value = self.server_game_manager.server.check_for_incoming_connections()
 
-        # if new connection was made
-        if return_value:
+            # if new connection was made
+            if return_value:
 
-            if self.error_message:
+                if self.error_message:
 
-                # Remove error message label
-                self.v_box.children.pop(len(self.v_box.children)-1)
-                self.error_message = False
+                    # Remove error message label
+                    self.v_box.children.pop(len(self.v_box.children)-1)
+                    self.error_message = False
 
-            # check if new connection is the first one
-            if self.server_game_manager.server.get_clients_count() == 1:
+                # check if new connection is the first one
+                if self.server_game_manager.server.get_clients_count() == 1:
 
-                # draw label for connected clients
-                connected_text = arcade.gui.UILabel(text="Connected players:", font_name=FONT_NAME, text_color=MAIN_COLOR)
-                self.v_box.add(connected_text.with_space_around(bottom=SMALL_PADDING))
+                    # draw label for connected clients
+                    connected_text = arcade.gui.UILabel(text="Connected players:", font_name=FONT_NAME, text_color=MAIN_COLOR)
+                    self.v_box.add(connected_text.with_space_around(bottom=SMALL_PADDING))
 
-            # add new client label
-            client_username, client_address, assigned_client_id = return_value
-            new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
-            self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))
+                # add new client label
+                client_username, client_address, assigned_client_id = return_value
+                new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
+                self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))

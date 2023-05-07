@@ -1,13 +1,14 @@
 import arcade.gui
 
-from .client_screen import ClientScreen
-from .server_screen import ServerScreen
+from .client_view import ClientView
+from .server_view import ServerView
 from .constants import *
 
 
-class StartScreen:
+class StartScreen(arcade.View):
     def __init__(self, app):
 
+        super().__init__()
         self.app = app
 
         # Create a vertical BoxGroup to align buttons
@@ -48,14 +49,16 @@ class StartScreen:
         Opens client screen.
         """
         self.app.manager.clear()
-        ClientScreen(self.app)
+        client_view = ClientView(self.app)
+        self.window.show_view(client_view)
 
     def __on_click_host(self, event):
         """
         Opens server screen.
         """
         self.app.manager.clear()
-        ServerScreen(self.app)
+        server_view = ServerView(self.app)
+        self.window.show_view(server_view)
 
     def __on_click_exit(self, event):
         """

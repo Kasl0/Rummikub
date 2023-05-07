@@ -4,10 +4,11 @@ from ..manager.client_game_manager import ClientGameManager
 from .constants import *
 
 
-class ClientScreen:
+class ClientView(arcade.View):
 
     def __init__(self, app):
 
+        super().__init__()
         self.app = app
         self.v_box = arcade.gui.UIBoxLayout()
         self.v_box.align = "left"
@@ -79,9 +80,6 @@ class ClientScreen:
             waiting_text = arcade.gui.UILabel(text="Waiting for game to start...", font_name=FONT_NAME, text_color=MAIN_COLOR, align="center")
             self.v_box.add(waiting_text.with_space_around(bottom=BIG_PADDING))
 
-            # Start checking for game start message
-            self.app.add_update_observer(self)
-
     def on_update(self, delta_time: float):
         """
             Called every game frame.
@@ -89,16 +87,16 @@ class ClientScreen:
         """
 
         # checking for game start message
-        return_value = self.client_game_manager.client.receive()
+        if self.client_game_manager:
+            return_value = self.client_game_manager.client.receive()
 
-        # if start message
-        if return_value:
+            # if start message
+            if return_value:
 
-            # Stop checking for game start message
-            self.app.remove_update_observer(self)
+                # Clear the screen
+                self.v_box.clear()
+                self.clear()
 
-            # Clear the screen
-            self.v_box.clear()
-
-            # Initialise the game
-            self.client_game_manager.game_initialization(self.app)
+                # Initialise the game
+                game_view = self.client_game_manager.game_initialization()
+                self.window.show_view(game_view)

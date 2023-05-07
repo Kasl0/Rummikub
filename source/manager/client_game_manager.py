@@ -43,11 +43,12 @@ class ClientGameManager:
 	def session_initialization(self):
 		self.client.connect()
 
-	def game_initialization(self, app):
+	def game_initialization(self):
 		self.client.s.setblocking(True)
+		self.client.s.settimeout(5)
 		self.rack = self.client.receive().content
 		print("Rack from the server:", self.rack)
-		ClientActualGame(app, self.rack)
+		return ClientActualGame(self.rack)
 
 	def main_game(self):
 		player = ClientActor(self.board, self.rack, self.client)
