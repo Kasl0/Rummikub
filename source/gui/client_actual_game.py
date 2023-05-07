@@ -1,8 +1,9 @@
 import arcade
 import arcade.gui
 
+from .game_button import GameButton
 from .game_constants import *
-from .tile_sprite import TileSprite, draw_rounded_rectangle_filled
+from .tile_sprite import TileSprite
 from ..logic.vector2d import Vector2d
 
 
@@ -14,6 +15,8 @@ class ClientActualGame(arcade.View):
         self.player = client_actor
 
         self.gui = None
+        self.confirm_button = None
+        self.draw_button = None
 
         # Get window dimensions
         self.screen_width, self.screen_height = self.window.get_size()
@@ -24,6 +27,7 @@ class ClientActualGame(arcade.View):
 
         self.display_board()
         self.display_rack()
+        self.display_buttons()
 
     def display_board(self):
 
@@ -85,13 +89,19 @@ class ClientActualGame(arcade.View):
             for column in range(RACK_COLUMN_COUNT):
 
                 x = MAT_WIDTH * column + MAT_WIDTH / 2
-                y = MAT_HEIGHT * row + MAT_HEIGHT / 2
+                y = RACK_HEIGHT - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
 
                 if current_tile < len(tiles):
                     current_cell = TileSprite(tiles[current_tile], x, y)
                     current_tile += 1
 
                     self.tile_list.append(current_cell)
+
+    def display_buttons(self):
+
+        button_width = 200
+        self.confirm_button = GameButton(RACK_WIDTH + GAP + button_width / 2, RACK_HEIGHT * 3/4, button_width, RACK_HEIGHT * 3/8, "Confirm")
+        self.draw_button = GameButton(RACK_WIDTH + GAP + button_width / 2, RACK_HEIGHT * 1 / 4, button_width, RACK_HEIGHT * 3/8, "Draw tile")
 
     def pull_to_top(self, card):
         """ Pull card to top of rendering order (last to render, looks on-top) """
@@ -105,6 +115,9 @@ class ClientActualGame(arcade.View):
 
         self.gui.draw()
 
+        self.confirm_button.draw()
+        self.draw_button.draw()
+
         for tile in self.tile_list:
             tile.draw()
 
@@ -112,6 +125,17 @@ class ClientActualGame(arcade.View):
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
+
+        # Check if the mouse press is on confrim button
+        if self.confirm_button.is_mouse_on_button(x, y):
+            print("confirming")
+            # TODO: link with client_actor handle_confirm_changes method
+
+        # Check if the mouse press is on draw button
+        if self.draw_button.is_mouse_on_button(x, y):
+            print("drawing")
+            # TODO: link with client_actor handle_draw_tile method
+
 
         # Check if the mouse press is on a card
         for tile in self.tile_list:
@@ -143,12 +167,9 @@ class ClientActualGame(arcade.View):
 
             self.held_tile = None
 
-        # TODO: temporarily we hardcode actiones that should be performed when dropping card
-        #  When the window becomes more functional, these handlers will be called depending on situation
-
         # if we want to make some action (draw a tile, place / move / remove tile, revert changes, end our turn)
         # just use one of client_actor's handlers
-        # self.client_actor.handle_draw_tile()
+        # self.player.handle_draw_tile()
 
         # TODO: After calling "handle_draw_card" and "handle_confirm_changes" (if it succeeds), an "enter_passive_state"
         #  is automatically called, so we can listen to the active player's changes.

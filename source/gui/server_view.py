@@ -88,8 +88,13 @@ class ServerView(arcade.View):
                 started_text = arcade.gui.UILabel(text="Game has started", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR, align="center")
                 self.v_box.add(started_text.with_space_around(bottom=TINY_PADDING))
 
+                self.app.on_draw()
+
                 # Start the game
                 self.server_game_manager.play()
+                # TODO: This method executes in an infinite loop and blocks gui.
+                #  Possible solution: self.on_update executes every frame. Maybe try executing fragment of play() code in each frame.
+                #  We need to remove infinitive loops.
 
     def on_update(self, delta_time: float):
         """

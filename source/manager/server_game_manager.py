@@ -38,11 +38,11 @@ class ServerGameManager:
 		print("All starting racks sent")
 
 		print("Main game part starts!")
-		# self.main_game()
+		self.main_game()
 		print("We have a winner")
 
 		print("Closing server")
-		# self.end_game()
+		self.end_game()
 
 		return
 
