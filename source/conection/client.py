@@ -39,7 +39,7 @@ class Client:
         self.id = int(self.receive().content)
         print("Assigned client ID: ", self.id)
 
-        self.s.setblocking(False)  # Socket does not block the client app
+        self.s.setblocking(False)
 
     def close_connection(self):
         """Closes connection with the server"""

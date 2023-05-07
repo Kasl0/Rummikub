@@ -1,4 +1,5 @@
 from enum import Enum
+from arcade import color
 
 
 class Color(Enum):
@@ -6,6 +7,17 @@ class Color(Enum):
     Blue = 2
     Red = 3
     Yellow = 4
+
+    def get_arcade_color(self):
+
+        if self.value == 1:
+            return color.BLACK
+        if self.value == 2:
+            return color.BLUE
+        if self.value == 3:
+            return color.RED
+        if self.value == 4:
+            return color.AMBER
 
     def __str__(self):
 
