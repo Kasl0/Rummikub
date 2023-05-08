@@ -44,9 +44,7 @@ class ClientGameManager:
 		self.client.connect()
 
 	def game_initialization(self):
-		self.client.s.setblocking(True)
-		self.client.s.settimeout(5)
-		self.rack = self.client.receive().content
+		self.rack = self.client.receive(blocking=True).content
 		print("Rack from the server:", self.rack)
 		return ClientActualGame(ClientActor(self.board, self.rack, self.client))
 

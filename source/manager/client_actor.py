@@ -9,6 +9,11 @@ from ..logic.vector2d import Vector2d
 from enum import Enum
 
 
+class ClientActorState(Enum):
+    ACTIVE = 1,
+    PASSIVE = 2
+
+
 class ClientActor:
     """Represents the player
 
@@ -20,45 +25,45 @@ class ClientActor:
         self.board = board
         self.rack = rack
         self.client = client
+        self.state = ClientActorState.PASSIVE
 
-
-#            self.handle_draw_tile()
-#
-
+#                self.handle_draw_tile()
 #                self.handle_board_change_place(Tile(parser.get_value(), parser.get_color()), parser.get_position())
-
 #                self.handle_board_change_move(parser.get_position(), parser.get_position2())
 #                self.handle_board_change_remove(parser.get_position())
-
 #                self.handle_revert_changes()
 #                response = self.handle_confirm_changes()
 #                if response[0]:
 #                    self.state = ClientActorState.PASSIVE
 #                    break
+    def check_if_should_introduce_changes(self) -> bool:
+        if not self.state.PASSIVE:
+            return False
 
-    def enter_passive_state(self):
-        print("Enter passive state")
-        while True:    # here we receive messages and react adequately
-            print()
-            print(self.rack)
-            print(self.board)
-            message = self.client.receive()
+        # here we receive messages and react adequately
+        message = self.client.receive(blocking=False)
 
-            if message.type == MessageType.CHANGE_INTRODUCED:
-                self._handle_board_change(message.content)
+        if not message:
+            return False
 
-            elif message.type == MessageType.TRUE_BOARD:
-                self.board = message.content
+        if message.type == MessageType.CHANGE_INTRODUCED:
+            self._handle_board_change(message.content)
 
-            elif message.type == MessageType.NEXT_TURN:
-                if int(message.content) == self.client.id:
-                    break
+        elif message.type == MessageType.TRUE_BOARD:
+            self.board = message.content
 
-            elif message.type == MessageType.GAME_ENDS:
-                return message.content
+        elif message.type == MessageType.NEXT_TURN:
+            if int(message.content) == self.client.id:
+                self.state = ClientActorState.ACTIVE
 
-            else:
-                raise ValueError("Received unexpected message: " + message.__str__())
+        elif message.type == MessageType.GAME_ENDS:
+            # TODO: Implement some way to end the game
+            pass
+
+        else:
+            raise ValueError("Received unexpected message: " + message.__str__())
+
+        return True
 
     #######################
     ### ACTION HANDLERS ###
@@ -66,28 +71,33 @@ class ClientActor:
 
     def _handle_board_change(self, board_change: BoardChange):
         if board_change.change_type == BoardChangeType.PLACE:
-            self.place_tile(board_change.tile, board_change.first_position, remove_from_rack=False)
+            self._place_tile(board_change.tile, board_change.first_position, remove_from_rack=False)
 
         elif board_change.change_type == BoardChangeType.MOVE:
             self.board.move_tile(board_change.first_position, board_change.second_position)
 
         elif board_change.change_type == BoardChangeType.REMOVE:
-            self.take_tile_off_board(board_change.first_position, add_to_rack=False)
+            self._take_tile_off_board(board_change.first_position, add_to_rack=False)
 
         else:
             raise ValueError("Received unexpected board change type: " + board_change.change_type.__str__())
 
     def handle_draw_tile(self):
         """Ask server for a tile and add it to the rack"""
-        self.client.send(Message(MessageType.DRAW_TILE, None))
-        self.receive_true_board_and_rack()
+        if self.state != ClientActorState.ACTIVE:
+            return
 
-        self.enter_passive_state()
+        self.client.send(Message(MessageType.DRAW_TILE, None))
+        self._receive_true_board_and_rack()
+        self.state = ClientActorState.PASSIVE
 
     def handle_board_change_place(self, tile: Tile, position: Vector2d):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         if self.rack.if_tile_on_rack(tile):
             # introduce change on your own board and rack
-            self.place_tile(tile, position, remove_from_rack=True)
+            self._place_tile(tile, position, remove_from_rack=True)
 
             # prepare change for server
             board_change = BoardChange(BoardChangeType.PLACE, tile, position, None)
@@ -97,6 +107,9 @@ class ClientActor:
             print("Failed to place tile: " + tile.__str__() + ", player doesn't have on their rack")
 
     def handle_board_change_move(self, source_position: Vector2d, destined_position: Vector2d):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         # introduce change on your own board
         self.board.move_tile(source_position, destined_position)
 
@@ -105,8 +118,11 @@ class ClientActor:
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
     def handle_board_change_remove(self, position: Vector2d):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         # introduce change on your own board and rack
-        self.take_tile_off_board(position, add_to_rack=True)
+        self._take_tile_off_board(position, add_to_rack=True)
 
         # prepare change for server
         board_change = BoardChange(BoardChangeType.REMOVE, None, position, None)
@@ -114,26 +130,35 @@ class ClientActor:
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
     def handle_revert_changes(self):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         self.client.send(Message(MessageType.REVERT_CHANGES, None))
-        self.receive_true_board_and_rack()
+        self._receive_true_board_and_rack()
 
     def handle_confirm_changes(self):
-        self.client.send(Message(MessageType.CONFIRM_CHANGES, None))
-        message = self.client.receive()
+        if self.state != ClientActorState.ACTIVE:
+            return
 
-        if message.type.OK or message.type.NOT_OK:
-            return message.content
+        self.client.send(Message(MessageType.CONFIRM_CHANGES, None))
+        message = self.client.receive(blocking=True)
+
+        if message.type == MessageType.OK:
+            self.state = ClientActorState.PASSIVE
+        elif message.type == MessageType.NOT_OK:
+            pass
         else:
             raise ValueError("Received unexpected message: " + message.__str__())
 
+        return message.content
 
     #########################
     ### AUXILIARY METHODS ###
     #########################
 
-    def receive_true_board_and_rack(self):
+    def _receive_true_board_and_rack(self):
         for _ in range(2):  # we will receive true board AND true rack
-            message = self.client.receive()
+            message = self.client.receive(blocking=True)
             if message.type == MessageType.TRUE_BOARD:
                 self.board = message.content
             elif message.type == MessageType.TRUE_RACK:
@@ -145,16 +170,19 @@ class ClientActor:
     ### FOR INTERACTIONS WITH BOARD AND RACK ###
     ############################################
 
-    def place_tile(self, tile: Tile, position: Vector2d, remove_from_rack: bool):
+    def _place_tile(self, tile: Tile, position: Vector2d, remove_from_rack: bool):
         """Place given tile on given position at the board"""
         if remove_from_rack:
             self.rack.remove_tile(tile)
 
         self.board.place_tile(tile, position)
 
-    def take_tile_off_board(self, position: Vector2d, add_to_rack: bool):
+    def _take_tile_off_board(self, position: Vector2d, add_to_rack: bool):
         """Take tile off the board and add it to player's rack"""
 
         tile = self.board.take_tile_off(position)
         if tile is not None and add_to_rack:
             self.rack.add_tile(tile)
+
+    # TODO: Perhaps consider some decorator instead of checking in 10 different methods if
+    #  "self.state != ClientActorState.ACTIVE".
