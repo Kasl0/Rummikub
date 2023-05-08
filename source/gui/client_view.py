@@ -1,3 +1,5 @@
+from typing import Union
+
 import arcade.gui
 
 from ..manager.client_game_manager import ClientGameManager
@@ -13,7 +15,7 @@ class ClientView(arcade.View):
         self.v_box = arcade.gui.UIBoxLayout()
         self.v_box.align = "left"
 
-        self.client_game_manager = None
+        self.client_game_manager: Union[ClientGameManager, None] = None
 
         # Boolean attribute that informs whether error message is already displayed or not
         self.error_message = False
@@ -21,19 +23,31 @@ class ClientView(arcade.View):
         # Client username
         username_text = arcade.gui.UILabel(text="Your username", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
         self.v_box.add(username_text.with_space_around(bottom=TINY_PADDING))
-        username_input = arcade.gui.UIInputText(text="Guest", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        username_input = arcade.gui.UIInputText(text="Guest",
+                                                font_name=FONT_NAME,
+                                                font_size=NORMAL_FONT_SIZE,
+                                                width=INPUT_TEXT_WIDTH,
+                                                text_color=INPUT_COLOR)
         self.v_box.add(username_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Server IP
         ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
         self.v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
-        ip_input = arcade.gui.UIInputText(text="192.168.1.28", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        ip_input = arcade.gui.UIInputText(text="192.168.1.28",
+                                          font_name=FONT_NAME,
+                                          font_size=NORMAL_FONT_SIZE,
+                                          width=INPUT_TEXT_WIDTH,
+                                          text_color=INPUT_COLOR)
         self.v_box.add(ip_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Server port
         port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
         self.v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
-        port_input = arcade.gui.UIInputText(text="1234", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        port_input = arcade.gui.UIInputText(text="1234",
+                                            font_name=FONT_NAME,
+                                            font_size=NORMAL_FONT_SIZE,
+                                            width=INPUT_TEXT_WIDTH,
+                                            text_color=INPUT_COLOR)
         self.v_box.add(port_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Connect button
@@ -58,7 +72,9 @@ class ClientView(arcade.View):
 
             # TODO: Verify here whether the server port is correct (is not a number) and if not draw error label
 
-            self.client_game_manager = ClientGameManager(username_input.text, ip_input.text, int(port_input.text))
+            self.client_game_manager = ClientGameManager(username_input.text.strip(),
+                                                         ip_input.text.strip(),
+                                                         int(port_input.text.strip()))
 
             try:
                 self.client_game_manager.session_initialization()
@@ -68,7 +84,10 @@ class ClientView(arcade.View):
 
                 # If connection was not made, draw error label
                 if not self.error_message:
-                    error_text = arcade.gui.UILabel(text="Connection error", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE, text_color=ERROR_COLOR)
+                    error_text = arcade.gui.UILabel(text="Connection error",
+                                                    font_name=FONT_NAME,
+                                                    font_size=ERROR_FONT_SIZE,
+                                                    text_color=ERROR_COLOR)
                     self.v_box.add(error_text.with_space_around(bottom=TINY_PADDING))
                     self.error_message = True
                 return
@@ -77,7 +96,10 @@ class ClientView(arcade.View):
             self.v_box.clear()
             self.error_message = False
 
-            waiting_text = arcade.gui.UILabel(text="Waiting for game to start...", font_name=FONT_NAME, text_color=MAIN_COLOR, align="center")
+            waiting_text = arcade.gui.UILabel(text="Waiting for game to start...",
+                                              font_name=FONT_NAME,
+                                              text_color=MAIN_COLOR,
+                                              align="center")
             self.v_box.add(waiting_text.with_space_around(bottom=BIG_PADDING))
 
     def on_update(self, delta_time: float):
@@ -88,7 +110,7 @@ class ClientView(arcade.View):
 
         # checking for game start message
         if self.client_game_manager:
-            return_value = self.client_game_manager.client.receive()
+            return_value = self.client_game_manager.client.receive(blocking=False)
 
             # if start message
             if return_value:

@@ -1,6 +1,7 @@
 import arcade
 
 from .game_constants import *
+from ..logic.tile import Tile
 
 
 def draw_rounded_rectangle_filled(center_x, center_y, width, height, corner_radius, color):
@@ -32,6 +33,7 @@ def draw_rounded_rectangle_filled(center_x, center_y, width, height, corner_radi
 
 class TileSprite:
     def __init__(self, tile, x, y):
+        self.tile = tile
         self.color = tile.color.get_arcade_color()
         self.value = tile.value
         self.x = x

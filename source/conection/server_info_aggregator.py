@@ -3,7 +3,7 @@ from socket import socket
 from typing import Dict, Tuple
 
 
-class ClientInfoAggregator:
+class ServerInfoAggregator:
 	# dictionary of clients
 	# keys - assigned client ids
 	# values - tuple of 3 elements: client_socket, client_address, client_username

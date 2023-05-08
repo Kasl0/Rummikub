@@ -3,7 +3,7 @@ import msvcrt
 import pickle
 
 from .message import Message, MessageType
-from .client_info_aggregator import ClientInfoAggregator
+from .server_info_aggregator import ServerInfoAggregator
 
 
 def get_server_ip():
@@ -27,7 +27,7 @@ class Server:
         self.s.setblocking(False)  # Waiting for players does not block the server
         self.s.listen()  # TCP server is now listening
 
-        self.clients: ClientInfoAggregator = ClientInfoAggregator()
+        self.clients: ServerInfoAggregator = ServerInfoAggregator()
         self.clients_count = 0
 
     def check_for_incoming_connections(self):
