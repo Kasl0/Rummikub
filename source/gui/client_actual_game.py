@@ -66,12 +66,12 @@ class ClientActualGame(arcade.View):
 
                 tile = self.player.board.tile_at(Vector2d(column, row))
 
+                current_cell = arcade.create_rectangle_filled(x, y, TILE_WIDTH, TILE_HEIGHT, BOARD_BACKGROUND_COLOR)
+                self.gui.append(current_cell)
+
                 if tile:
-                    current_cell = TileSprite(tile, x, y)
-                    self.tile_list.append(current_cell)
-                else:
-                    current_cell = arcade.create_rectangle_filled(x, y, TILE_WIDTH, TILE_HEIGHT, BOARD_BACKGROUND_COLOR)
-                    self.gui.append(current_cell)
+                    tile_sprite = TileSprite(tile, x, y)
+                    self.tile_list.append(tile_sprite)
 
     def display_rack(self):
 
@@ -103,20 +103,20 @@ class ClientActualGame(arcade.View):
 
         button_width = 200
         self.confirm_button = GameButton(RACK_WIDTH + GAP + button_width / 2,
-                                         RACK_HEIGHT * 5/5,
+                                         RACK_HEIGHT * 5 / 5,
                                          button_width,
-                                         RACK_HEIGHT * 1/4,
+                                         RACK_HEIGHT * 1 / 4,
                                          "Confirm")
         self.draw_button = GameButton(RACK_WIDTH + GAP + button_width / 2,
-                                      RACK_HEIGHT * 3/5,
+                                      RACK_HEIGHT * 3 / 5,
                                       button_width,
-                                      RACK_HEIGHT * 1/4,
+                                      RACK_HEIGHT * 1 / 4,
                                       "Draw tile")
 
         self.revert_button = GameButton(RACK_WIDTH + GAP + button_width / 2,
-                                        RACK_HEIGHT * 1/5,
+                                        RACK_HEIGHT * 1 / 5,
                                         button_width,
-                                        RACK_HEIGHT * 1/4,
+                                        RACK_HEIGHT * 1 / 4,
                                         "Revert changes")
 
     def board_is_hovering(self, x, y) -> Optional[Vector2d]:
@@ -176,6 +176,10 @@ class ClientActualGame(arcade.View):
         # Check if the mouse press is on a card
         for tile in self.tile_list:
             if tile.is_hovering(x, y):
+
+                self.tile_list.remove(tile)
+                self.tile_list.append(tile)
+
                 tile.start_dragging()
                 self.held_tile = tile
                 self.held_tile_original_position = (tile.x, tile.y)
@@ -212,22 +216,30 @@ class ClientActualGame(arcade.View):
                                                     self.held_tile_original_position[1])
             end_position = self.board_is_hovering(x, y)
 
+            return_to_original = True
+
             if end_position:
                 if start_position:
-                    # tile was above board when picked up
-                    self.player.handle_board_change_move(start_position, end_position)
+
+                    if start_position != end_position and self.player.board.tile_at(end_position) == None:
+                        # tile was above board when picked up
+                        self.player.handle_board_change_move(start_position, end_position)
+                        return_to_original = False
+
                 else:
                     # tile had to be on the rack
                     self.player.handle_board_change_place(self.held_tile.tile, end_position)
+                    return_to_original = False
 
-                self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
-                self.held_tile.y = self.screen_height - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
-
-            else:
+            if return_to_original:
                 # cannot place tile, return it to original position
                 x_original, y_original = self.held_tile_original_position
                 self.held_tile.x = x_original
                 self.held_tile.y = y_original
+
+            else:
+                self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
+                self.held_tile.y = self.screen_height - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
 
             self.held_tile = None
 
