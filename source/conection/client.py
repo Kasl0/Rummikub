@@ -67,7 +67,7 @@ class Client:
         try:
 
             if self._s and self._s.fileno() != -1:
-                received_msg = self._s.recv(1024)
+                received_msg = self._s.recv(2048)
                 if received_msg:
                     message = pickle.loads(received_msg)
                     print(message)

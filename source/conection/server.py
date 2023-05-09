@@ -88,7 +88,7 @@ class Server:
         """Receives message from client with the given id.
         Returns string"""
 
-        message = pickle.loads(self.clients.get_socket(client_id).recv(1024))
+        message = pickle.loads(self.clients.get_socket(client_id).recv(2048))
         print(message)
         return message
 
