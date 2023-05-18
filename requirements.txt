@@ -1,1 +1,4 @@
 arcade
+pyperclip
+keyboard
+pyautogui

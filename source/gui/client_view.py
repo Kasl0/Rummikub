@@ -1,5 +1,7 @@
 from typing import Union
-
+from keyboard import press, release
+from pyautogui import typewrite
+from pyperclip import paste
 import arcade.gui
 
 from ..manager.client_game_manager import ClientGameManager
@@ -70,7 +72,7 @@ class ClientView(arcade.View):
             #  (is string with correct structure: 4 numbers 0-255 and 3 dots between them, no spaces)
             #  and if not draw error label
 
-            # TODO: Verify here whether the server port is correct (is not a number) and if not draw error label
+            # TODO: Verify here whether the server port is correct and if not draw error label
 
             self.client_game_manager = ClientGameManager(username_input.text.strip(),
                                                          ip_input.text.strip(),
@@ -122,3 +124,35 @@ class ClientView(arcade.View):
                 # Initialise the game
                 game_view = self.client_game_manager.game_initialization()
                 self.window.show_view(game_view)
+
+    def on_key_press(self, key, modifiers):
+        """
+            Called every key press.
+            When CTRL+V is pressed, clears selected text and pastes text from clipboard
+        """
+
+        if key == arcade.key.V and (modifiers & arcade.key.MOD_CTRL):
+            pasted_text = paste()
+            if isinstance(pasted_text, str):
+                _clear_selected_text()
+                typewrite(pasted_text)
+
+
+def _clear_selected_text():
+    """
+        Primitive method of deleting the contents of the selected text.
+    """
+
+    # Click the home button
+    press('home')
+
+    # Press Ctrl + Shift + End
+    press('ctrl')
+    press('shift')
+    press('end')
+    release('ctrl')
+    release('shift')
+    release('end')
+
+    # Click the delete key
+    press('delete')
