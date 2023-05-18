@@ -30,6 +30,9 @@ class Color(Enum):
         if self.value == 4:
             return "yellow"
 
+    def __lt__(self, other):
+        return self.value < other.value
+
 
 class Tile:
     def __init__(self, value: int, color: Color):
@@ -52,3 +55,8 @@ class Tile:
             return False
 
         return self.color == other.color and self.value == other.value
+
+    def __lt__(self, other):
+        if self.value == other.value:
+            return self.color < other.color
+        return self.value < other.value

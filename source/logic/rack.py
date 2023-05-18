@@ -1,3 +1,5 @@
+import bisect
+
 from .tile import Tile
 
 
@@ -17,7 +19,13 @@ class Rack:
         return False
 
     def add_tile(self, tile: Tile):
-        self.__tiles.append(tile)
+        """Adds tile to the rack in an ordered way"""
+
+        # Find the index to insert the tile
+        index = bisect.bisect_left(self.__tiles, tile)
+
+        # Insert the tile at the determined index
+        self.__tiles.insert(index, tile)
 
     def remove_tile(self, tile: Tile):
         """Remove given tile from the rack"""
