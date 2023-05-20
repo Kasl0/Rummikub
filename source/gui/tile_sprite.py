@@ -1,7 +1,6 @@
 import arcade
 
 from .game_constants import *
-from ..logic.tile import Tile
 
 
 def draw_rounded_rectangle_filled(center_x, center_y, width, height, corner_radius, color):
@@ -35,6 +34,7 @@ class TileSprite:
     def __init__(self, tile, x, y):
         self.tile = tile
         self.color = tile.color.get_arcade_color()
+        self.background_color = TILE_BACKGROUND_COLOR
         self.value = tile.value
         self.x = x
         self.y = y
@@ -43,7 +43,7 @@ class TileSprite:
     def draw(self):
 
         # Draw the tile as a rectangle
-        draw_rounded_rectangle_filled(self.x, self.y, TILE_WIDTH, TILE_HEIGHT, TILE_CORNER_RADIUS, TILE_BACKGROUND_COLOR)
+        draw_rounded_rectangle_filled(self.x, self.y, TILE_WIDTH, TILE_HEIGHT, TILE_CORNER_RADIUS, self.background_color)
 
         # Draw the value on the tile
         arcade.draw_text(str(self.value), self.x, self.y + TILE_HEIGHT/7, self.color, font_size=TILE_FONT_SIZE, anchor_x="center", anchor_y="center", bold=True)
@@ -53,6 +53,7 @@ class TileSprite:
         return abs(x - self.x) < TILE_WIDTH / 2 and abs(y - self.y) < TILE_HEIGHT / 2
 
     def start_dragging(self):
+        self.background_color = TILE_BACKGROUND_COLOR
         self.is_dragging = True
 
     def stop_dragging(self):
@@ -62,3 +63,6 @@ class TileSprite:
         if self.is_dragging:
             self.x = x
             self.y = y
+
+    def make_wrong_placed(self):
+        self.background_color = WRONGLY_PLACED_TILE_BACKGROUND_COLOR

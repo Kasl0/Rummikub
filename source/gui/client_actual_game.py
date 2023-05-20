@@ -5,6 +5,7 @@ import arcade
 import arcade.gui
 
 from .game_button import GameButton
+from .ui_constants import *
 from .game_constants import *
 from .tile_sprite import TileSprite
 
@@ -28,6 +29,7 @@ class ClientActualGame(arcade.View):
         self.confirm_button: Optional[GameButton] = None
         self.draw_button: Optional[GameButton] = None
         self.revert_button: Optional[GameButton] = None
+        self.error_message: str = ""
 
         # Get window dimensions
         self.screen_width, self.screen_height = self.window.get_size()
@@ -61,8 +63,7 @@ class ClientActualGame(arcade.View):
         for row in range(BOARD_ROW_COUNT):
             for column in range(BOARD_COLUMN_COUNT):
 
-                x = MAT_WIDTH * column + MAT_WIDTH / 2
-                y = self.screen_height - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
+                x, y = self.get_coordinates(row, column)
 
                 tile = self.player.board.tile_at(Vector2d(column, row))
 
@@ -119,6 +120,23 @@ class ClientActualGame(arcade.View):
                                         RACK_HEIGHT * 1 / 4,
                                         "Revert changes")
 
+    def get_coordinates(self, row, column):
+        x = MAT_WIDTH * column + MAT_WIDTH / 2
+        y = self.screen_height - (MAT_HEIGHT * row + MAT_HEIGHT / 2)
+
+        return x, y
+
+    def draw_confirm_error(self, row, column_sequence_start, column_sequence_end, error_message):
+
+        self.error_message = error_message
+
+        for column in range(column_sequence_start, column_sequence_end+1):
+            x, y = self.get_coordinates(row, column)
+
+            for tile in self.tile_list:
+                if tile.is_hovering(x, y):
+                    tile.make_wrong_placed()
+
     def board_is_hovering(self, x, y) -> Optional[Vector2d]:
         """
             Checks if (x,y) is hovering over the board.
@@ -156,6 +174,10 @@ class ClientActualGame(arcade.View):
         self.draw_button.draw()
         self.revert_button.draw()
 
+        # Display label for error messages
+        if self.error_message:
+            arcade.draw_text(text=self.error_message, start_x=RACK_WIDTH/2, start_y=RACK_HEIGHT + GAP/2, anchor_x="center", anchor_y="center", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE, color=ERROR_COLOR)
+
         for tile in self.tile_list:
             tile.draw()
 
@@ -192,23 +214,8 @@ class ClientActualGame(arcade.View):
         if self.player.state != ClientActorState.ACTIVE:
             return
 
-        # Check if the mouse is on confirm button
-        if self.confirm_button.is_mouse_on_button(x, y):
-            self.player.handle_confirm_changes()
-            self.display_everything()
-
-        # Check if the mouse is on draw button
-        if self.draw_button.is_mouse_on_button(x, y):
-            self.player.handle_draw_tile()
-            self.display_everything()
-
-        # Check if the mouse is on revert button
-        if self.revert_button.is_mouse_on_button(x, y):
-            self.player.handle_revert_changes()
-            self.display_everything()
-
         # Stop dragging the selected card
-        if self.held_tile:
+        elif self.held_tile:
 
             self.held_tile.stop_dragging()
 
@@ -225,6 +232,7 @@ class ClientActualGame(arcade.View):
                         # tile was above board when picked up
                         self.player.handle_board_change_move(start_position, end_position)
                         return_to_original = False
+                        self.error_message = ""
 
                 else:
                     # tile had to be on the rack
@@ -242,6 +250,27 @@ class ClientActualGame(arcade.View):
                 self.held_tile.y = self.screen_height - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
 
             self.held_tile = None
+
+        # Check if the mouse is on confirm button
+        elif self.confirm_button.is_mouse_on_button(x, y):
+            verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
+            if verification_result:
+                self.error_message = ""
+                self.display_everything()
+            else:
+                self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
+
+        # Check if the mouse is on draw button
+        elif self.draw_button.is_mouse_on_button(x, y):
+            self.error_message = ""
+            self.player.handle_draw_tile()
+            self.display_everything()
+
+        # Check if the mouse is on revert button
+        elif self.revert_button.is_mouse_on_button(x, y):
+            self.error_message = ""
+            self.player.handle_revert_changes()
+            self.display_everything()
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """
