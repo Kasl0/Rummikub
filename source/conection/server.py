@@ -1,6 +1,7 @@
 import socket
 import msvcrt
 import pickle
+from typing import Optional
 
 from .message import Message, MessageType
 from .server_info_aggregator import ServerInfoAggregator
@@ -84,16 +85,23 @@ class Server:
             if client_id != exempted_client_id:
                 self.send(client_id, message)
 
-    def receive(self, client_id) -> Message:
+    def receive(self, client_id, blocking: bool) -> Optional[Message]:
         """Receives message from client with the given id.
         Returns string"""
+        self.clients.get_socket(client_id).setblocking(blocking)
 
-        message = pickle.loads(self.clients.get_socket(client_id).recv(2048))
-        print(message)
-        return message
+        try:
+            received_msg = self.clients.get_socket(client_id).recv(2048)
+            if received_msg:
+                message = pickle.loads(received_msg)
+                print(message)
+                return message
+            else:
+                return None
+        except IOError as e:
+            # handle the case where there are no incoming messages
+            pass
 
     def get_clients_count(self):
-        """
-            Returns number of connected clients.
-        """
+        """Returns number of connected clients."""
         return self.clients_count
