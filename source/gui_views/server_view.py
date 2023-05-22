@@ -1,3 +1,5 @@
+from typing import Optional
+
 import arcade.gui
 from pyperclip import copy
 
@@ -15,7 +17,7 @@ class ServerView(arcade.View):
         self.v_box = arcade.gui.UIBoxLayout()
         self.v_box.align = "left"
 
-        self.server_game_manager = None
+        self.server_game_manager: Optional[ServerGameManager] = None
 
         # Boolean attribute that informs whether game has already started
         self.started = False
@@ -130,7 +132,8 @@ class ServerView(arcade.View):
                 self.app.on_draw()
 
                 # Start the game
-                self.server_game_manager.play()
+                self.server_game_manager.session_initialization()
+                self.server_game_manager.game_initialization()
                 # TODO: This method executes in an infinite loop and blocks gui.
                 #  Possible solution: self.on_update executes every frame. Maybe try executing fragment of play() code in each frame.
                 #  We need to remove infinitive loops.
@@ -165,3 +168,11 @@ class ServerView(arcade.View):
                 client_username, client_address, assigned_client_id = return_value
                 new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
                 self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))
+        print("on update")
+        if self.started:
+            received_message = self.server_game_manager.update_main_game()
+            # TODO: Implement pretty displaying of incoming messages
+            # if received_message:
+            #     message_label = arcade.gui.UILabel(text=received_message.__str__(), font_name=FONT_NAME,
+            #                                        font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR, align="center")
+            #     self.v_box.add(message_label)

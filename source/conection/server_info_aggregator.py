@@ -22,13 +22,13 @@ class ServerInfoAggregator:
 	def get_client_ids(self):
 		return self._clients.keys()
 
-	def get_socket(self, client_id: int):
+	def get_socket(self, client_id: int) -> socket:
 		return self._get_nth_element_of_client(client_id, 0)
 
-	def get_address(self, client_id: int):
+	def get_address(self, client_id: int) -> any:
 		return self._get_nth_element_of_client(client_id, 1)
 
-	def get_username(self, client_id: int):
+	def get_username(self, client_id: int) -> str:
 		return self._get_nth_element_of_client(client_id, 2)
 
 	def _get_nth_element_of_client(self, client_id: int, n: int):
