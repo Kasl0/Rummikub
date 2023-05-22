@@ -50,9 +50,7 @@ class ServerActor:
 
     def update_main_game(self) -> Optional[Message]:
         """Check if there is any waiting Message to handle"""
-        print("check if got message")
         message = self.server.receive(self.active_player_id, blocking=False)
-        print("got message")
 
         if message is None:
             return None

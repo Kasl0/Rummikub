@@ -63,7 +63,6 @@ class ServerGameManager:
 		self.server_actor.start_next_turn()
 
 	def update_main_game(self):
-		print("update_main_game")
 		return self.server_actor.update_main_game()  # enter main part of the game
 
 	def end_game(self):

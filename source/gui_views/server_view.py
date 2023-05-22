@@ -168,11 +168,11 @@ class ServerView(arcade.View):
                 client_username, client_address, assigned_client_id = return_value
                 new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
                 self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))
-        print("on update")
+
         if self.started:
             received_message = self.server_game_manager.update_main_game()
-            # TODO: Implement pretty displaying of incoming messages
-            # if received_message:
-            #     message_label = arcade.gui.UILabel(text=received_message.__str__(), font_name=FONT_NAME,
-            #                                        font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR, align="center")
-            #     self.v_box.add(message_label)
+            if received_message:
+                message_label = arcade.gui.widgets.UITextArea(text=received_message.__str__(),
+                                                              font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR,
+                                                              width=SCREEN_WIDTH * 0.8, height=SCREEN_HEIGHT * 0.25)
+                self.v_box.add(message_label)
