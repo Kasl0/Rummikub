@@ -30,7 +30,7 @@ def draw_rounded_rectangle_filled(center_x, center_y, width, height, corner_radi
     arcade.draw_circle_filled(right - corner_radius, bottom + corner_radius, corner_radius, color)
 
 
-class TileSprite:
+class GameTile:
     def __init__(self, tile, x, y):
         self.tile = tile
         self.color = tile.color.get_arcade_color()
@@ -64,5 +64,5 @@ class TileSprite:
             self.x = x
             self.y = y
 
-    def make_wrong_placed(self):
+    def mark_wrong_placed(self):
         self.background_color = WRONGLY_PLACED_TILE_BACKGROUND_COLOR

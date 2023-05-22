@@ -2,7 +2,7 @@ from ..logic.board import Board
 from ..logic.rack import Rack
 from ..conection.client import Client
 from .client_actor import ClientActor
-from ..gui.client_actual_game import ClientActualGame
+from ..gui_game.game import Game
 
 
 class ClientGameManager:
@@ -46,7 +46,7 @@ class ClientGameManager:
 	def game_initialization(self):
 		self.rack = self.client.receive(blocking=True).content
 		print("Rack from the server:", self.rack)
-		return ClientActualGame(ClientActor(self.board, self.rack, self.client))
+		return Game(ClientActor(self.board, self.rack, self.client))
 
 	"""def main_game(self):
 		player = ClientActor(self.board, self.rack, self.client)

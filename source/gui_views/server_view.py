@@ -1,9 +1,9 @@
 import arcade.gui
 from pyperclip import copy
 
-from ..manager.server_game_manager import ServerGameManager
-from ..conection.server import get_server_ip
-from .ui_constants import *
+from source.manager.server_game_manager import ServerGameManager
+from source.conection.server import get_server_ip
+from source.gui_views.view_constants import *
 
 
 class ServerView(arcade.View):

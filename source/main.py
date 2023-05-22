@@ -1,6 +1,6 @@
 import arcade
 
-from .gui.app import App
+from source.app import App
 
 
 def main():

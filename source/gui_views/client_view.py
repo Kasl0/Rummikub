@@ -4,8 +4,8 @@ from pyautogui import typewrite
 from pyperclip import paste
 import arcade.gui
 
-from ..manager.client_game_manager import ClientGameManager
-from .ui_constants import *
+from source.manager.client_game_manager import ClientGameManager
+from source.gui_views.view_constants import *
 
 
 class ClientView(arcade.View):

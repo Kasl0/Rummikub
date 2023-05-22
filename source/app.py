@@ -1,13 +1,13 @@
 import arcade.gui
 
-from .start_screen import StartScreen
-from .ui_constants import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, BACKGROUND_COLOR
+from source.gui_views.start_view import StartView
+from source.gui_views.view_constants import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, BACKGROUND_COLOR
 
 
 class App(arcade.Window):
 
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, resizable=True)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, resizable=False)
 
         # Required for all code that uses UI element,
         # a UIManager to handle the UI.
@@ -18,7 +18,7 @@ class App(arcade.Window):
         arcade.set_background_color(BACKGROUND_COLOR)
 
         # Display start screen
-        start_screen = StartScreen(self)
+        start_screen = StartView(self)
         self.show_view(start_screen)
 
     def on_draw(self):

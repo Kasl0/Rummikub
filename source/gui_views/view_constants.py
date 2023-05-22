@@ -1,5 +1,5 @@
 import arcade
-from .game_constants import BOARD_WIDTH, BOARD_HEIGHT, GAP, RACK_HEIGHT
+from source.gui_game.game_constants import BOARD_WIDTH, BOARD_HEIGHT, GAP, RACK_HEIGHT
 
 # Screen title and size
 SCREEN_TITLE = "Rummikub"
