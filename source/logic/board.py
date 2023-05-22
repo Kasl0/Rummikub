@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .tile import Tile
+from .tile import Tile, Color
 from .vector2d import Vector2d
 
 
@@ -82,8 +82,6 @@ class Board:
         self.__remove_tile(position)
         return tile
 
-
-    # TODO: VERIFY WHETHER TILE CAN BE REMOVED - WHETHER TILE IS CURRENT PLAYER TILE
     def __remove_tile(self, position: Vector2d):
         """Removes tile from given position"""
 
@@ -137,22 +135,42 @@ class Board:
 
         color_sequence = True
         set_sequence = True
-        color = self.tile_at(Vector2d(end_column, row)).color
-        value = self.tile_at(Vector2d(end_column, row)).value
-        colors_in_sequence = {color}
+
+        if self.tile_at(Vector2d(start_column, row)).value == Tile.Joker and self.tile_at(Vector2d(start_column+1, row)).value == 1:
+            color_sequence = False
+
+        if self.tile_at(Vector2d(end_column, row)).value == Tile.Joker and self.tile_at(Vector2d(end_column-1, row)).value == 13:
+            color_sequence = False
+
+        color = None
+        value = None
+        colors_in_sequence = None
+
+        for i in range(end_column, start_column, -1):
+            tile = self.tile_at(Vector2d(i, row))
+            if tile.value != Tile.Joker:
+                color = tile.color
+                value = tile.value
+                colors_in_sequence = {color}
+                end_column = i
+                break
 
         for i in range(start_column, end_column):
             tile = self.tile_at(Vector2d(i, row))
 
-            if tile.color != color or tile.value + 1 != self.tile_at(Vector2d(i+1, row)).value:
-                color_sequence = False
+            if tile.value != Tile.Joker and tile.color != Color.Joker:
+                if tile.color != color or (self.tile_at(Vector2d(i+1, row)).value != Tile.Joker and tile.value + 1 != self.tile_at(Vector2d(i+1, row)).value):
+                    color_sequence = False
 
-            if tile.value != value or tile.color in colors_in_sequence:
-                set_sequence = False
+                if tile.value != value or tile.color in colors_in_sequence:
+                    set_sequence = False
 
-            colors_in_sequence.add(tile.color)
+                colors_in_sequence.add(tile.color)
 
-        # print(str(row) + " " + str(start_column) + " " + str(end_column))
+            else:
+                if i != start_column:
+                    if self.tile_at(Vector2d(i-1, row)).value + 2 != self.tile_at(Vector2d(i+1, row)).value:
+                        color_sequence = False
 
         if not (color_sequence or set_sequence):
             return False, "Incorrect sequence"

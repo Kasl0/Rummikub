@@ -1,11 +1,11 @@
 import arcade.gui
 
-from .client_view import ClientView
-from .server_view import ServerView
-from .ui_constants import *
+from source.gui_views.client_view import ClientView
+from source.gui_views.server_view import ServerView
+from source.gui_views.view_constants import *
 
 
-class StartScreen(arcade.View):
+class StartView(arcade.View):
     def __init__(self, app):
 
         super().__init__()

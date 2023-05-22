@@ -1,8 +1,9 @@
 import arcade.gui
+from pyperclip import copy
 
-from ..manager.server_game_manager import ServerGameManager
-from ..conection.server import get_server_ip
-from .ui_constants import *
+from source.manager.server_game_manager import ServerGameManager
+from source.conection.server import get_server_ip
+from source.gui_views.view_constants import *
 
 
 class ServerView(arcade.View):
@@ -23,13 +24,13 @@ class ServerView(arcade.View):
         self.error_message = False
 
         # Server IP
-        ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR, width=COPY_BUTTON_GAP)
         self.v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
         ip = arcade.gui.UILabel(text=get_server_ip(), font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR)
         self.v_box.add(ip.with_space_around(bottom=NORMAL_PADDING))
 
         # Server port
-        port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
+        port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR, width=COPY_BUTTON_GAP)
         self.v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
         port_input = arcade.gui.UIInputText(text="1234", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
         self.v_box.add(port_input.with_space_around(bottom=NORMAL_PADDING))
@@ -48,15 +49,53 @@ class ServerView(arcade.View):
         @start_button.event("on_click")
         def __on_click_start(event):
 
+            # TODO: Verify here whether the server port is correct and if not draw error label
+
             # Get port number
+            port_number = int(port_input.text)
 
-            # TODO: Verify here whether the server port is correct (is not a number) and if not draw error label
+            self.server_game_manager = ServerGameManager(port_number)
 
-            self.server_game_manager = ServerGameManager(int(port_input.text))
-
-            # Lobby
             self.v_box.clear()
 
+            # Server IP
+            ip_h_box = arcade.gui.UIBoxLayout(vertical=False)
+            ip_v_box = arcade.gui.UIBoxLayout(align="left")
+
+            ip_v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
+            ip_v_box.add(ip.with_space_around())
+
+            ip_h_box.add(ip_v_box.with_space_around(right=BIG_PADDING))
+
+            ip_copy_button = arcade.gui.UIFlatButton(text="Copy", width=COPY_BUTTON_WIDTH, style=BUTTON_STYLE)
+            ip_h_box.add(ip_copy_button.with_space_around())
+
+            self.v_box.add(ip_h_box.with_space_around(bottom=NORMAL_PADDING))
+
+            @ip_copy_button.event("on_click")
+            def __on_click_ip_copy(event):
+                copy(ip.text)
+
+            # Server port
+            port_h_box = arcade.gui.UIBoxLayout(vertical=False)
+            port_v_box = arcade.gui.UIBoxLayout(align="left")
+
+            port_v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
+            port = arcade.gui.UILabel(text=str(port_number), font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR)
+            port_v_box.add(port.with_space_around())
+
+            port_h_box.add(port_v_box.with_space_around(right=BIG_PADDING))
+
+            port_copy_button = arcade.gui.UIFlatButton(text="Copy", width=COPY_BUTTON_WIDTH, style=BUTTON_STYLE)
+            port_h_box.add(port_copy_button.with_space_around())
+
+            self.v_box.add(port_h_box.with_space_around(bottom=BIG_PADDING * 2))
+
+            @port_copy_button.event("on_click")
+            def __on_click_port_copy(event):
+                copy(str(port_number))
+
+            # Lobby
             lobby_text = arcade.gui.UILabel(text="Game lobby is now open", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR)
             self.v_box.add(lobby_text.with_space_around(bottom=TINY_PADDING))
 

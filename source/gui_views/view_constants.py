@@ -1,5 +1,5 @@
 import arcade
-from .game_constants import BOARD_WIDTH, BOARD_HEIGHT, GAP, RACK_HEIGHT
+from source.gui_game.game_constants import BOARD_WIDTH, BOARD_HEIGHT, GAP, RACK_HEIGHT
 
 # Screen title and size
 SCREEN_TITLE = "Rummikub"
@@ -29,6 +29,8 @@ TINY_PADDING = 5
 
 # Buttons
 BUTTON_WIDTH = 200
+COPY_BUTTON_WIDTH = 100
+COPY_BUTTON_GAP = 280
 
 BUTTON_STYLE = {
     "font_name": FONT_NAME,
