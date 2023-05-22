@@ -41,11 +41,12 @@ class GameBoard:
 
         return None
 
-    def get_game_tile(self, x, y) -> Optional[GameTile]:
+    def get_game_tile(self, x, y, remove=True) -> Optional[GameTile]:
 
         for tile in self.board_tiles:
             if tile.is_hovering(x, y):
-                self.board_tiles.remove(tile)
+                if remove:
+                    self.board_tiles.remove(tile)
                 return tile
 
         return None
@@ -83,6 +84,11 @@ class GameBoard:
             for tile in self.board_tiles:
                 if tile.is_hovering(x, y):
                     tile.mark_wrong_placed()
+
+    def unmark_all_tiles_as_new(self):
+        for tile in self.board_tiles:
+            if tile.is_new:
+                tile.unmark_as_new()
 
     def on_draw(self):
         self.objects_to_draw.draw()

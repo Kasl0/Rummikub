@@ -100,7 +100,7 @@ class Game(arcade.View):
     def on_update(self, delta_time: float):
         super().on_update(delta_time)
         if self.player.check_if_should_introduce_changes():
-            self.display_everything()
+            self.game_board.display(self.player.board)
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
@@ -122,7 +122,6 @@ class Game(arcade.View):
         self.held_tile = self.game_rack.get_game_tile(x, y)
 
         if self.held_tile:
-            print(self.held_tile.tile.__str__())
             self.held_tile_original_position = (self.held_tile.x, self.held_tile.y)
             self.held_tile_taken_from = TakenFrom.RACK
             self.held_tile.start_dragging()
@@ -153,6 +152,7 @@ class Game(arcade.View):
                         self.player.handle_board_change_place(self.held_tile.tile, end_position)
                         self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
                         self.held_tile.y = SCREEN_HEIGHT - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
+                        self.held_tile.mark_as_new()
                         self.game_board.add_game_tile(self.held_tile)
                     else:
                         return_to_original = True
@@ -181,11 +181,27 @@ class Game(arcade.View):
 
                     # Tile is from rack
                     if self.held_tile_taken_from == TakenFrom.RACK:
-                        raise ValueError("Rack -> Rack, need to be implemented")
+                        if self.game_rack.get_game_tile(x, y, remove=False, over_mat=True) is None:
+                            self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
+                            self.held_tile.y = RACK_HEIGHT - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
+                            self.game_rack.add_game_tile(self.held_tile)
+                        else:
+                            return_to_original = True
 
                     # Tile is from board
                     elif self.held_tile_taken_from == TakenFrom.BOARD:
-                        raise ValueError("Board -> Rack, need to be implemented")
+                        original_vector2d = self.game_board.get_column_row(*self.held_tile_original_position)
+                        if self.game_rack.get_game_tile(x, y, remove=False, over_mat=True) is None:
+                            if self.held_tile.is_new:
+                                self.player.handle_board_change_remove(original_vector2d)
+                                self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
+                                self.held_tile.y = RACK_HEIGHT - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
+                                self.game_rack.add_game_tile(self.held_tile)
+                            else:
+                                self.error_message = "You cannot take tile from board that is not yours"
+                                return_to_original = True
+                        else:
+                            return_to_original = True
 
                     else:
                         raise ValueError("We don't know where tile is from")
@@ -216,19 +232,21 @@ class Game(arcade.View):
             verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
             if verification_result:
                 self.error_message = ""
-                self.display_everything()
+                self.game_board.unmark_all_tiles_as_new()
             else:
                 self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
 
         # Check if the mouse is on draw button
         elif self.draw_button.is_mouse_on_button(x, y):
             self.error_message = ""
+            self.game_board.unmark_all_tiles_as_new()
             self.player.handle_draw_tile()
             self.display_everything()
 
         # Check if the mouse is on revert button
         elif self.revert_button.is_mouse_on_button(x, y):
             self.error_message = ""
+            self.game_board.unmark_all_tiles_as_new()
             self.player.handle_revert_changes()
             self.display_everything()
 

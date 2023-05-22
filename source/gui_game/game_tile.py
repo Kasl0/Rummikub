@@ -38,6 +38,7 @@ class GameTile:
         self.value = tile.value
         self.x = x
         self.y = y
+        self.is_new = False
         self.is_dragging = False
 
     def draw(self):
@@ -48,9 +49,15 @@ class GameTile:
         # Draw the value on the tile
         arcade.draw_text(str(self.value), self.x, self.y + TILE_HEIGHT/7, self.color, font_size=TILE_FONT_SIZE, anchor_x="center", anchor_y="center", bold=True)
 
-    def is_hovering(self, x, y):
+    def is_hovering(self, x, y, over_mat=False):
+
+        # Check if the mouse pointer is hovering over the mat
+        if over_mat:
+            return abs(x - self.x) < MAT_WIDTH / 2 and abs(y - self.y) < MAT_HEIGHT / 2
+
         # Check if the mouse pointer is hovering over the tile
-        return abs(x - self.x) < TILE_WIDTH / 2 and abs(y - self.y) < TILE_HEIGHT / 2
+        else:
+            return abs(x - self.x) < TILE_WIDTH / 2 and abs(y - self.y) < TILE_HEIGHT / 2
 
     def start_dragging(self):
         self.background_color = TILE_BACKGROUND_COLOR
@@ -63,6 +70,12 @@ class GameTile:
         if self.is_dragging:
             self.x = x
             self.y = y
+
+    def mark_as_new(self):
+        self.is_new = True
+
+    def unmark_as_new(self):
+        self.is_new = False
 
     def mark_wrong_placed(self):
         self.background_color = WRONGLY_PLACED_TILE_BACKGROUND_COLOR

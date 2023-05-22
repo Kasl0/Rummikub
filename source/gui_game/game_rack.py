@@ -41,11 +41,12 @@ class GameRack:
 
         return None
 
-    def get_game_tile(self, x, y) -> Optional[GameTile]:
+    def get_game_tile(self, x, y, remove=True, over_mat=False) -> Optional[GameTile]:
 
         for tile in self.rack_tiles:
-            if tile.is_hovering(x, y):
-                self.rack_tiles.remove(tile)
+            if tile.is_hovering(x, y, over_mat=over_mat):
+                if remove:
+                    self.rack_tiles.remove(tile)
                 return tile
 
         return None
@@ -58,7 +59,8 @@ class GameRack:
         self.rack_tiles = []
 
         # Draw rack background
-        rack_background = arcade.create_rectangle_filled(RACK_WIDTH / 2, RACK_HEIGHT / 2, RACK_WIDTH, RACK_HEIGHT, RACK_COLOR)
+        rack_background = arcade.create_rectangle_filled(RACK_WIDTH / 2, RACK_HEIGHT / 2, RACK_WIDTH, RACK_HEIGHT,
+                                                         RACK_COLOR)
         self.objects_to_draw.append(rack_background)
 
         tiles = rack.get_tiles()
