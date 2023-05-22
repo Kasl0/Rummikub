@@ -197,6 +197,7 @@ class Game(arcade.View):
                                 self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
                                 self.held_tile.y = RACK_HEIGHT - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
                                 self.game_rack.add_game_tile(self.held_tile)
+                                self.error_message = ""
                             else:
                                 self.error_message = "You cannot take tile from board that is not yours"
                                 return_to_original = True
@@ -229,12 +230,18 @@ class Game(arcade.View):
 
         # Check if the mouse is on confirm button
         elif self.confirm_button.is_mouse_on_button(x, y):
-            verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
-            if verification_result:
-                self.error_message = ""
-                self.game_board.unmark_all_tiles_as_new()
+
+            if self.game_board.is_any_tile_new():
+
+                verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
+                if verification_result:
+                    self.error_message = ""
+                    self.game_board.unmark_all_tiles_as_new()
+                else:
+                    self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
+
             else:
-                self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
+                self.error_message = "You need to place at least one tile"
 
         # Check if the mouse is on draw button
         elif self.draw_button.is_mouse_on_button(x, y):

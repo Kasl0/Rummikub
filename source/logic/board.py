@@ -82,7 +82,6 @@ class Board:
         self.__remove_tile(position)
         return tile
 
-    # Todo: VERIFY WHETHER TILE CAN BE REMOVED - WHETHER TILE IS CURRENT PLAYER TILE
     def __remove_tile(self, position: Vector2d):
         """Removes tile from given position"""
 

@@ -85,6 +85,12 @@ class GameBoard:
                 if tile.is_hovering(x, y):
                     tile.mark_wrong_placed()
 
+    def is_any_tile_new(self):
+        for tile in self.board_tiles:
+            if tile.is_new:
+                return True
+        return False
+
     def unmark_all_tiles_as_new(self):
         for tile in self.board_tiles:
             if tile.is_new:
