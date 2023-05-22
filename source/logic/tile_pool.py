@@ -10,10 +10,17 @@ class TilePool:
         self.__tiles = []
 
         for color in Color:
+            if color == Color.Joker:
+                continue
+
             for value in range(1, 14):
                 # each tile has to copies in starting pool
                 self.__tiles.append(Tile(value, color))
                 self.__tiles.append(Tile(value, color))
+
+        # add 2 jokers
+        self.__tiles.append(Tile(Tile.Joker, Color.Joker))
+        self.__tiles.append(Tile(Tile.Joker, Color.Joker))
 
         random.shuffle(self.__tiles)
 

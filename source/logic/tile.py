@@ -3,6 +3,8 @@ from arcade import color
 
 
 class Color(Enum):
+
+    Joker = 0
     Black = 1
     Blue = 2
     Red = 3
@@ -10,6 +12,8 @@ class Color(Enum):
 
     def get_arcade_color(self):
 
+        if self.value == 0:
+            return color.GREEN
         if self.value == 1:
             return color.BLACK
         if self.value == 2:
@@ -21,6 +25,8 @@ class Color(Enum):
 
     def __str__(self):
 
+        if self.value == 0:
+            return "Joker"
         if self.value == 1:
             return "black"
         if self.value == 2:
@@ -35,12 +41,13 @@ class Color(Enum):
 
 
 class Tile:
-    def __init__(self, value: int, color: Color):
 
-        if not isinstance(value, int):
-            raise TypeError("Value must be int")
-        if not 1 <= value <= 13:
-            raise ValueError("Value must be between 1 and 13")
+    Joker = "J"
+
+    def __init__(self, value, color: Color):
+
+        if not (value == self.Joker or 1 <= value <= 13):
+            raise ValueError("Value must be between 1 and 13 or Joker")
         if not isinstance(color, Color):
             raise TypeError("Color must be Color(Enum)")
 
@@ -57,6 +64,10 @@ class Tile:
         return self.color == other.color and self.value == other.value
 
     def __lt__(self, other):
-        if self.value == other.value:
+        if self.value == self.Joker:
+            return True
+        elif other.value == self.Joker:
+            return False
+        elif self.value == other.value:
             return self.color < other.color
         return self.value < other.value
