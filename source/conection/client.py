@@ -1,6 +1,6 @@
 import pickle
 import socket
-from typing import Union
+from typing import Union, Optional
 
 from .message import Message, MessageType
 
@@ -57,7 +57,7 @@ class Client:
         else:
             print("Not connected to server.")
 
-    def receive(self, blocking: bool) -> Union[Message, None]:
+    def receive(self, blocking: bool) -> Optional[Message]:
         """Receives message from the server.
 
         :param blocking - tells if client should wait for next message indefinitely or
@@ -66,7 +66,7 @@ class Client:
         self._s.setblocking(blocking)
         try:
 
-            if self._s and self._s.fileno() != -1:
+            if self._s.fileno() != -1:
                 received_msg = self._s.recv(2048)
                 if received_msg:
                     message = pickle.loads(received_msg)
