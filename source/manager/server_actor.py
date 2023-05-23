@@ -1,6 +1,6 @@
 from copy import deepcopy
 from time import sleep
-from typing import Dict
+from typing import Dict, Optional
 
 from ..logic.board import Board
 from ..logic.rack import Rack
@@ -8,24 +8,25 @@ from ..conection.message import MessageType, Message
 from ..conection.board_change import BoardChange, BoardChangeType
 from ..conection.server import Server
 from ..logic.tile_pool import TilePool
-from ..logic.tile import Tile
+from ..logic.tile import Tile, Color
 from ..logic.vector2d import Vector2d
 
 
 class ServerActor:
     """Represents the main game part master
 
-    Manages main game part. Informs players about next turns. Listens to active player.
+    Manages game main part. Informs players about next turns. Listens to active player.
     Synchronises changes introduced by an active player and informs passive players about them.
-    Has one, true and only valid board and racks states.
-    """
+    Has one, true and only valid board and racks states."""
 
     def __init__(self, racks: Dict[int, Rack], tile_pool: TilePool, server: Server):
         self.true_board = Board()
-        self.temp_board = Board()
+        self.__temp_board = Board()
 
-        self.temp_rack = Rack()
-        self.true_racks = racks
+        self.__temp_rack = Rack()
+        # starting temp rack cannot be empty, otherwise the game will end immediately
+        self.__temp_rack.add_tile(Tile(Tile.Joker, Color.Joker))
+        self.__true_racks = racks
 
         self.tile_pool = tile_pool
 
@@ -33,81 +34,82 @@ class ServerActor:
 
         self.active_player_id = 1
 
-    def serve_main_game_part(self) -> int:
-        """ Main game loop. Manage whole session"""
-        while True:
-            print("New turn starts. Active player: " + self.active_player_id.__str__())
-            self.temp_board = deepcopy(self.true_board)
-            self.temp_rack = deepcopy(self.true_racks[self.active_player_id])
+    def start_next_turn(self):
+        # if game should end
+        if self.__temp_rack.is_empty():
+            return self.__end_main_game(self.active_player_id)
 
-            self.announce_next_turn()
+        # get next player
+        self.active_player_id = self.server.clients.get_next_client_id(self.active_player_id)
 
-            while True:
-                print()
-                print(self.temp_rack)
-                print(self.temp_board)
+        print("New turn starts. Active player: " + self.active_player_id.__str__())
+        self.__temp_board = deepcopy(self.true_board)
+        self.__temp_rack = deepcopy(self.__true_racks[self.active_player_id])
 
-                message = self.server.receive(self.active_player_id)
+        self.__announce_next_turn()
 
-                if message.type == MessageType.DRAW_TILE:
-                    self.handle_draw_tile()
-                    break
+    def update_main_game(self) -> Optional[Message]:
+        """Check if there are any waiting Messages to handle"""
+        message = self.server.receive(self.active_player_id, blocking=False)
 
-                elif message.type == MessageType.CHANGE_INTRODUCED:
-                    self.handle_introduced_change(message.content)
+        if message is None:
+            return None
 
-                elif message.type == MessageType.REVERT_CHANGES:
-                    self.handle_revert_changes()
+        if message.type == MessageType.DRAW_TILE:
+            self.__handle_draw_tile()
+            self.start_next_turn()
 
-                elif message.type == MessageType.CONFIRM_CHANGES:
-                    result = self.handle_confirm_changes()
-                    print("Confirmation response: " + result.__str__())
-                    if result[0]:
-                        break
-                else:
-                    raise ValueError("Received unexpected message: " + message.__str__())
+        elif message.type == MessageType.CHANGE_INTRODUCED:
+            self.__handle_introduced_change(message.content)
 
-            # if game should end
-            if self.temp_rack.is_empty():
-                return self.end_main_game(self.active_player_id)
+        elif message.type == MessageType.REVERT_CHANGES:
+            self.__handle_revert_changes()
 
-            self.active_player_id = self.server.clients.get_next_client_id(self.active_player_id)
+        elif message.type == MessageType.CONFIRM_CHANGES:
+            result = self.__handle_confirm_changes()
+            print("Confirmation response: " + result.__str__())
+            if result[0]:
+                self.start_next_turn()
+        else:
+            raise ValueError("Received unexpected message: " + message.__str__())
 
-    #####################################
-    ### ACTIVE PLAYER ACTION HANDLERS ###
-    #####################################
+        return message
 
-    def handle_draw_tile(self):
+    #################################
+    # ACTIVE PLAYER ACTION HANDLERS #
+    #################################
+
+    def __handle_draw_tile(self):
         self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
         drawn_tile = self.tile_pool.draw_random_tile()
-        self.true_racks[self.active_player_id].add_tile(drawn_tile)
-        self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
+        self.__true_racks[self.active_player_id].add_tile(drawn_tile)
+        self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.__true_racks[self.active_player_id]))
 
-    def handle_introduced_change(self, board_change: BoardChange):
+    def __handle_introduced_change(self, board_change: BoardChange):
         if board_change.change_type == BoardChangeType.PLACE:
-            self.place_tile_on_temporary_board(board_change.tile, board_change.first_position)
+            self.__place_tile_on_temporary_board(board_change.tile, board_change.first_position)
 
         elif board_change.change_type == BoardChangeType.MOVE:
-            self.temp_board.move_tile(board_change.first_position, board_change.second_position)
+            self.__temp_board.move_tile(board_change.first_position, board_change.second_position)
 
         elif board_change.change_type == BoardChangeType.REMOVE:
-            self.take_tile_off_temporary_board(board_change.first_position)
+            self.__take_tile_off_temporary_board(board_change.first_position)
 
         else:
             raise ValueError("Received unexpected board change type: " + board_change.change_type.__str__())
 
         self.server.send_all_except(self.active_player_id, Message(MessageType.CHANGE_INTRODUCED, board_change))
 
-    def handle_revert_changes(self):
-        self.temp_board = deepcopy(self.true_board)
-        self.temp_rack = deepcopy(self.true_racks[self.active_player_id])
+    def __handle_revert_changes(self):
+        self.__temp_board = deepcopy(self.true_board)
+        self.__temp_rack = deepcopy(self.__true_racks[self.active_player_id])
         self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
-        self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.true_racks[self.active_player_id]))
+        self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.__true_racks[self.active_player_id]))
 
-    def handle_confirm_changes(self):
+    def __handle_confirm_changes(self):
         def confirmation_approved():
             self.server.send(self.active_player_id, Message(MessageType.OK, verification_result))
-            self.persist_temporary_elements()
+            self.__persist_temporary_elements()
             self.server.send_all_except(
                 self.active_player_id,
                 Message(MessageType.TRUE_BOARD, self.true_board))
@@ -115,43 +117,46 @@ class ServerActor:
         def confirmation_rejected():
             self.server.send(self.active_player_id, Message(MessageType.NOT_OK, verification_result))
 
-        verification_result = self.temp_board.verify()
+        verification_result = self.__temp_board.verify()
         if verification_result[0]:
             confirmation_approved()
         else:
             confirmation_rejected()
         return verification_result
 
-    #########################
-    ### AUXILIARY METHODS ###
-    #########################
+    #####################
+    # AUXILIARY METHODS #
+    #####################
 
-    def announce_next_turn(self):
+    def __announce_next_turn(self):
         # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
-        sleep(1)
-        self.server.send_all(Message(MessageType.NEXT_TURN, self.active_player_id))
+        #  and I have no idea why it's like that. I even created separate method __receive_board_and_rack_and_next_turn
+        #  in ClientActor but to no avail
+        sleep(0.1)
+        message_content = (self.active_player_id, self.server.clients.get_username(self.active_player_id))
+        self.server.send_all(Message(MessageType.NEXT_TURN, message_content))
 
-    def persist_temporary_elements(self):
-        self.true_board = self.temp_board
-        self.true_racks[self.active_player_id] = self.temp_rack
+    def __persist_temporary_elements(self):
+        self.true_board = self.__temp_board
+        self.__true_racks[self.active_player_id] = self.__temp_rack
 
-    def end_main_game(self, client_id: int):
+    def __end_main_game(self, client_id: int):
         winner_username = self.server.clients.get_username(client_id)
         self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
         return winner_username
 
-    ######################################################
-    ### FOR INTERACTIONS WITH temporary BOARD AND RACK ###
-    ######################################################
+    ##################################################
+    # FOR INTERACTIONS WITH temporary BOARD AND RACK #
+    ##################################################
 
-    def place_tile_on_temporary_board(self, tile: Tile, position: Vector2d):
+    def __place_tile_on_temporary_board(self, tile: Tile, position: Vector2d):
         """Place given tile on given position at the temporary board"""
-        self.temp_rack.remove_tile(tile)
-        self.temp_board.place_tile(tile, position)
+        self.__temp_rack.remove_tile(tile)
+        self.__temp_board.place_tile(tile, position)
 
-    def take_tile_off_temporary_board(self, position: Vector2d):
+    def __take_tile_off_temporary_board(self, position: Vector2d):
         """Take tile off the temporary board and add it to the temporary rack"""
 
-        tile = self.temp_board.take_tile_off(position)
+        tile = self.__temp_board.take_tile_off(position)
         if tile is not None:
-            self.temp_rack.add_tile(tile)
+            self.__temp_rack.add_tile(tile)
