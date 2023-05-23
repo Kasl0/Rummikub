@@ -72,6 +72,7 @@ class Server:
         print("Closed all connections and socket")
 
     def send(self, client_id, message: Message):
+        print("Sent:\n" + message.__str__())
         self.clients.get_socket(client_id).sendall(pickle.dumps(message))
 
     def send_all(self, message: Message):
