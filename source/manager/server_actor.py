@@ -75,46 +75,6 @@ class ServerActor:
 
         return message
 
-    # def update_main_game_part(self) -> Message:
-    #     """Check if there is any waiting Message to handle"""
-    #     while True:
-    #         print("New turn starts. Active player: " + self.active_player_id.__str__())
-    #         self.temp_board = deepcopy(self.true_board)
-    #         self.temp_rack = deepcopy(self.true_racks[self.active_player_id])
-    #
-    #         self.announce_next_turn()
-    #
-    #         while True:
-    #             print()
-    #             print(self.temp_rack)
-    #             print(self.temp_board)
-    #
-    #             message = self.server.receive(self.active_player_id, blocking=True)
-    #
-    #             if message.type == MessageType.DRAW_TILE:
-    #                 self.handle_draw_tile()
-    #                 break
-    #
-    #             elif message.type == MessageType.CHANGE_INTRODUCED:
-    #                 self.handle_introduced_change(message.content)
-    #
-    #             elif message.type == MessageType.REVERT_CHANGES:
-    #                 self.handle_revert_changes()
-    #
-    #             elif message.type == MessageType.CONFIRM_CHANGES:
-    #                 result = self.handle_confirm_changes()
-    #                 print("Confirmation response: " + result.__str__())
-    #                 if result[0]:
-    #                     break
-    #             else:
-    #                 raise ValueError("Received unexpected message: " + message.__str__())
-    #
-    #         # if game should end
-    #         if self.temp_rack.is_empty():
-    #             return self.end_main_game(self.active_player_id)
-    #
-    #         self.active_player_id = self.server.clients.get_next_client_id(self.active_player_id)
-
     #####################################
     ### ACTIVE PLAYER ACTION HANDLERS ###
     #####################################
@@ -171,7 +131,8 @@ class ServerActor:
     def __announce_next_turn(self):
         # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
         sleep(1)
-        self.server.send_all(Message(MessageType.NEXT_TURN, self.active_player_id))
+        message_content = (self.active_player_id, self.server.clients.get_username(self.active_player_id))
+        self.server.send_all(Message(MessageType.NEXT_TURN, message_content))
 
     def __persist_temporary_elements(self):
         self.true_board = self.__temp_board

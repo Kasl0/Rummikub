@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ..logic.board import Board
 from ..logic.rack import Rack
 from ..conection.client import Client
@@ -26,15 +28,9 @@ class ClientActor:
         self.client = client
         self.state = ClientActorState.PASSIVE
 
-#                self.handle_draw_tile()
-#                self.handle_board_change_place(Tile(parser.get_value(), parser.get_color()), parser.get_position())
-#                self.handle_board_change_move(parser.get_position(), parser.get_position2())
-#                self.handle_board_change_remove(parser.get_position())
-#                self.handle_revert_changes()
-#                response = self.handle_confirm_changes()
-#                if response[0]:
-#                    self.state = ClientActorState.PASSIVE
-#                    break
+        self.active_player_id: Optional[int] = None
+        self.active_player_nick: Optional[str] = None
+
     def check_if_should_introduce_changes(self) -> bool:
         if not self.state.PASSIVE:
             return False
@@ -52,7 +48,9 @@ class ClientActor:
             self.board = message.content
 
         elif message.type == MessageType.NEXT_TURN:
-            if int(message.content) == self.client.id:
+            active_player_id, self.active_player_nick = message.content
+
+            if active_player_id == self.client.id:
                 self.state = ClientActorState.ACTIVE
 
         elif message.type == MessageType.GAME_ENDS:

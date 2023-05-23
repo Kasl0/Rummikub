@@ -61,7 +61,7 @@ class Client:
         """Receives message from the server.
 
         :param blocking - tells if client should wait for next message indefinitely or
-        if it should only peek if there already is a message
+        if it should only peek if there is an awaiting message
         """
         self._s.setblocking(blocking)
         try:
