@@ -34,7 +34,7 @@ class ServerView(arcade.View):
         # Server port
         port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR, width=COPY_BUTTON_GAP)
         self.v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
-        port_input = arcade.gui.UIInputText(text="1234", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
+        port_input = arcade.gui.UIInputText(text="9888", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, width=INPUT_TEXT_WIDTH, text_color=INPUT_COLOR)
         self.v_box.add(port_input.with_space_around(bottom=NORMAL_PADDING))
 
         # Start server button
@@ -169,10 +169,13 @@ class ServerView(arcade.View):
                 new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
                 self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))
 
+        # performing main game part loop
         if self.started:
             received_message = self.server_game_manager.update_main_game()
             if received_message:
-                message_label = arcade.gui.widgets.UITextArea(text=received_message.__str__(),
-                                                              font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR,
-                                                              width=SCREEN_WIDTH * 0.8, height=SCREEN_HEIGHT * 0.25)
-                self.v_box.add(message_label)
+                # TODO: Implement better message displaying
+                # message_label = arcade.gui.widgets.UITextArea(text=received_message.__str__(),
+                #                                               font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR,
+                #                                               width=SCREEN_WIDTH * 0.8, height=SCREEN_HEIGHT * 0.25)
+                # self.v_box.add(message_label)
+                pass

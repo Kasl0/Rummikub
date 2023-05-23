@@ -45,7 +45,7 @@ class ClientView(arcade.View):
         # Server port
         port_text = arcade.gui.UILabel(text="The server port", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
         self.v_box.add(port_text.with_space_around(bottom=TINY_PADDING))
-        port_input = arcade.gui.UIInputText(text="1234",
+        port_input = arcade.gui.UIInputText(text="9888",
                                             font_name=FONT_NAME,
                                             font_size=NORMAL_FONT_SIZE,
                                             width=INPUT_TEXT_WIDTH,
