@@ -53,8 +53,6 @@ class Game(arcade.View):
         self.game_rack.display(self.player.rack)
         self.display_buttons()
 
-        # TODO: Display somehow who is an active player (whose turn it is)
-
     def display_buttons(self):
 
         button_width = 200
