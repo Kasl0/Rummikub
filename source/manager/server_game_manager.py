@@ -52,7 +52,7 @@ class ServerGameManager:
 		self.server.send_all(Message(MessageType.GAME_STARTS, "Starting game"))
 
 	def game_initialization(self):
-		sleep(0.5)  # TODO: Not very professional (but works)
+		sleep(1)  # TODO: Not very professional (but works)
 		for client_id in self.server.clients.get_client_ids():
 			self.racks[client_id] = Rack()
 

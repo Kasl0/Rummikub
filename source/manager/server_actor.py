@@ -132,7 +132,7 @@ class ServerActor:
         # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
         #  and I have no idea why it's like that. I even created separate method __receive_board_and_rack_and_next_turn
         #  in ClientActor but to no avail
-        sleep(0.1)
+        sleep(1)
         message_content = (self.active_player_id, self.server.clients.get_username(self.active_player_id))
         self.server.send_all(Message(MessageType.NEXT_TURN, message_content))
 
