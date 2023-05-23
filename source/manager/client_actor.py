@@ -30,7 +30,7 @@ class ClientActor:
         self.state = ClientActorState.PASSIVE
 
         self.active_player_id: Optional[int] = None
-        self.active_player_nick: Optional[str] = None
+        self.active_player_nick: str = ""
 
     def check_if_should_introduce_changes(self) -> bool:
         if not self.state.PASSIVE:
@@ -145,8 +145,7 @@ class ClientActor:
 
     def __handle_next_turn(self, message):
         active_player_id, self.active_player_nick = message.content
-        if active_player_id == self.client.id:
-            self.state = ClientActorState.ACTIVE
+        self.state = ClientActorState.ACTIVE if active_player_id == self.client.id else ClientActorState.PASSIVE
 
     #####################
     # AUXILIARY METHODS #
@@ -164,7 +163,6 @@ class ClientActor:
 
     def __receive_board_and_rack_and_next_turn(self):
         for _ in range(3):  # we will receive true board AND true rack AND next_turn message
-            print("wuj")
             message = self.client.receive(blocking=True)
             if message.type == MessageType.TRUE_BOARD:
                 self.board = message.content

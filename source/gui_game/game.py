@@ -38,7 +38,6 @@ class Game(arcade.View):
 
         # UI messages and texts
         self.error_message: str = ""
-        self.active_player_nick: str = ""
 
         # Held tile
         self.held_tile: Optional[GameTile] = None
@@ -52,6 +51,20 @@ class Game(arcade.View):
         self.game_board.display(self.player.board)
         self.game_rack.display(self.player.rack)
         self.display_buttons()
+        self.display_label()
+
+    def display_label(self):
+        # Display label for error messages
+        if self.error_message:
+            arcade.Text(text=self.error_message, start_x=RACK_WIDTH / 2, start_y=RACK_HEIGHT + GAP / 2,
+                        anchor_x="center", anchor_y="center", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE,
+                        color=ERROR_COLOR).draw()
+
+        # Display active player nick
+        else:
+            arcade.Text(text="Current player: " + self.player.active_player_nick, start_x=RACK_WIDTH / 2,
+                        start_y=RACK_HEIGHT + GAP / 2, anchor_x="center", anchor_y="center", font_name=FONT_NAME,
+                        font_size=NORMAL_FONT_SIZE, color=MAIN_COLOR).draw()
 
     def display_buttons(self):
 
@@ -87,13 +100,7 @@ class Game(arcade.View):
         self.draw_button.draw()
         self.revert_button.draw()
 
-        # Display label for error messages
-        if self.error_message:
-            arcade.Text(text=self.error_message, start_x=RACK_WIDTH/2, start_y=RACK_HEIGHT + GAP/2, anchor_x="center", anchor_y="center", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE, color=ERROR_COLOR).draw()
-
-        # Display active player nick
-        else:
-            arcade.Text(text="Current player: " + self.active_player_nick, start_x=RACK_WIDTH/2, start_y=RACK_HEIGHT + GAP/2, anchor_x="center", anchor_y="center", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, color=MAIN_COLOR).draw()
+        self.display_label()
 
         if self.held_tile:
             self.held_tile.draw()
@@ -104,7 +111,7 @@ class Game(arcade.View):
         super().on_update(delta_time)
         if self.player.check_if_should_introduce_changes():
             self.game_board.display(self.player.board)
-            self.active_player_nick = self.player.active_player_nick
+            self.display_label()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
