@@ -49,7 +49,7 @@ class ServerActor:
         self.__announce_next_turn()
 
     def update_main_game(self) -> Optional[Message]:
-        """Check if there is any waiting Message to handle"""
+        """Check if there are any waiting Messages to handle"""
         message = self.server.receive(self.active_player_id, blocking=False)
 
         if message is None:
@@ -75,9 +75,9 @@ class ServerActor:
 
         return message
 
-    #####################################
-    ### ACTIVE PLAYER ACTION HANDLERS ###
-    #####################################
+    #################################
+    # ACTIVE PLAYER ACTION HANDLERS #
+    #################################
 
     def __handle_draw_tile(self):
         self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
@@ -124,9 +124,9 @@ class ServerActor:
             confirmation_rejected()
         return verification_result
 
-    #########################
-    ### AUXILIARY METHODS ###
-    #########################
+    #####################
+    # AUXILIARY METHODS #
+    #####################
 
     def __announce_next_turn(self):
         # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
@@ -143,9 +143,9 @@ class ServerActor:
         self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
         return winner_username
 
-    ######################################################
-    ### FOR INTERACTIONS WITH temporary BOARD AND RACK ###
-    ######################################################
+    ##################################################
+    # FOR INTERACTIONS WITH temporary BOARD AND RACK #
+    ##################################################
 
     def __place_tile_on_temporary_board(self, tile: Tile, position: Vector2d):
         """Place given tile on given position at the temporary board"""

@@ -67,14 +67,6 @@ class ClientActor:
     # ACTION HANDLERS #
     ###################
 
-    def __client_is_active(self, func):
-        def wrapper():
-            if self.state != ClientActorState.ACTIVE:
-                return
-            return func()
-
-        return wrapper
-
     def _handle_board_change(self, board_change: BoardChange):
         if board_change.change_type == BoardChangeType.PLACE:
             self._place_tile(board_change.tile, board_change.first_position, remove_from_rack=False)
@@ -88,15 +80,16 @@ class ClientActor:
         else:
             raise ValueError("Received unexpected board change type: " + board_change.change_type.__str__())
 
-    @__client_is_active
     def handle_draw_tile(self):
         """Ask server for a tile and add it to the rack"""
         self.client.send(Message(MessageType.DRAW_TILE, None))
         self._receive_true_board_and_rack()
         self.state = ClientActorState.PASSIVE
 
-    @__client_is_active
     def handle_board_change_place(self, tile: Tile, position: Vector2d):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         if self.rack.if_tile_on_rack(tile):
             # introduce change on your own board and rack
             self._place_tile(tile, position, remove_from_rack=True)
@@ -108,8 +101,10 @@ class ClientActor:
         else:
             print("Failed to place tile: " + tile.__str__() + ", player doesn't have on their rack")
 
-    @__client_is_active
     def handle_board_change_move(self, source_position: Vector2d, destined_position: Vector2d):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         # introduce change on your own board
         self.board.move_tile(source_position, destined_position)
 
@@ -117,8 +112,10 @@ class ClientActor:
         board_change = BoardChange(BoardChangeType.MOVE, None, source_position, destined_position)
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
-    @__client_is_active
     def handle_board_change_remove(self, position: Vector2d):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         # introduce change on your own board and rack
         self._take_tile_off_board(position, add_to_rack=True)
 
@@ -127,13 +124,17 @@ class ClientActor:
 
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
-    @__client_is_active
     def handle_revert_changes(self):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         self.client.send(Message(MessageType.REVERT_CHANGES, None))
         self._receive_true_board_and_rack()
 
-    @__client_is_active
     def handle_confirm_changes(self):
+        if self.state != ClientActorState.ACTIVE:
+            return
+
         self.client.send(Message(MessageType.CONFIRM_CHANGES, None))
         message = self.client.receive(blocking=True)
 
@@ -171,7 +172,6 @@ class ClientActor:
 
         self.board.place_tile(tile, position)
 
-    @__client_is_active
     def _take_tile_off_board(self, position: Vector2d, add_to_rack: bool):
         """Take tile off the board and add it to player's rack"""
 
