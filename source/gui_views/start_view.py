@@ -1,15 +1,17 @@
-import arcade.gui
+from arcade.gui import UIManager
 
 from source.gui_views.client_view import ClientView
-from source.gui_views.server_view import ServerView
+from source.gui_views.server_lobby_view import ServerLobbyView
 from source.gui_views.view_constants import *
 
 
 class StartView(arcade.View):
-    def __init__(self, app):
+    def __init__(self):
 
         super().__init__()
-        self.app = app
+        # self.app = arcade.Window
+        self.manager = UIManager()
+        self.manager.enable()
 
         # Create a vertical BoxGroup to align buttons
         self.v_box = arcade.gui.UIBoxLayout()
@@ -37,7 +39,7 @@ class StartView(arcade.View):
         exit_button.on_click = self.__on_click_exit
 
         # Create a widget to hold the v_box widget, that will center the buttons
-        self.app.manager.add(
+        self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
@@ -48,20 +50,27 @@ class StartView(arcade.View):
         """
         Opens client screen.
         """
-        self.app.manager.clear()
-        client_view = ClientView(self.app)
+        self.manager.disable()
+        self.manager.clear()
+        client_view = ClientView()
         self.window.show_view(client_view)
 
     def __on_click_host(self, event):
         """
         Opens server screen.
         """
-        self.app.manager.clear()
-        server_view = ServerView(self.app)
+        self.manager.disable()
+        self.manager.clear()
+        server_view = ServerLobbyView()
         self.window.show_view(server_view)
 
     def __on_click_exit(self, event):
         """
         Closes the app.
         """
+        self.manager.disable()
         arcade.exit()
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
