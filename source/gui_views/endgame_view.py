@@ -1,7 +1,7 @@
 import arcade.gui
 
 from source.gui_views.client_view import ClientView
-from source.gui_views.server_view import ServerView
+from source.gui_views.server_lobby_view import ServerLobbyView
 from source.gui_views.view_constants import *
 
 

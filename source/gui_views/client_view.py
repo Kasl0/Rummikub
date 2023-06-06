@@ -1,4 +1,6 @@
-from typing import Union
+from typing import Union, Optional
+
+from arcade.gui import UIManager
 from keyboard import press, release
 from pyautogui import typewrite
 from pyperclip import paste
@@ -10,14 +12,16 @@ from source.gui_views.view_constants import *
 
 class ClientView(arcade.View):
 
-    def __init__(self, app):
+    def __init__(self):
 
         super().__init__()
-        self.app = app
+        self.manager = UIManager()
+        self.manager.enable()
+
         self.v_box = arcade.gui.UIBoxLayout()
         self.v_box.align = "left"
 
-        self.client_game_manager: Union[ClientGameManager, None] = None
+        self.client_game_manager: Optional[ClientGameManager] = None
 
         # Boolean attribute that informs whether error message is already displayed or not
         self.error_message = False
@@ -56,7 +60,7 @@ class ClientView(arcade.View):
         connect_button = arcade.gui.UIFlatButton(text="Connect", width=BUTTON_WIDTH, style=BUTTON_STYLE)
         self.v_box.add(connect_button.with_space_around(bottom=NORMAL_PADDING))
 
-        self.app.manager.add(
+        self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
@@ -117,12 +121,15 @@ class ClientView(arcade.View):
             # if start message
             if return_value:
 
+                # TODO: Napewno potrzebne?
                 # Clear the screen
                 self.v_box.clear()
                 self.clear()
 
                 # Initialise the game
                 game_view = self.client_game_manager.initialize_game()
+                self.manager.disable()
+                self.manager.clear()
                 self.window.show_view(game_view)
 
     def on_key_press(self, key, modifiers):
@@ -136,6 +143,10 @@ class ClientView(arcade.View):
             if isinstance(pasted_text, str):
                 _clear_selected_text()
                 typewrite(pasted_text)
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
 
 
 def _clear_selected_text():
