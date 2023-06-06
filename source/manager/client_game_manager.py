@@ -40,10 +40,10 @@ class ClientGameManager:
 
 		return"""
 
-	def session_initialization(self):
+	def initialize_session(self):
 		self.client.connect()
 
-	def game_initialization(self):
+	def initialize_game(self):
 		self.rack = self.client.receive(blocking=True).content
 		print("Rack from the server:", self.rack)
 		return Game(ClientActor(self.board, self.rack, self.client))

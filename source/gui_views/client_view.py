@@ -35,7 +35,7 @@ class ClientView(arcade.View):
         # Server IP
         ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
         self.v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
-        ip_input = arcade.gui.UIInputText(text="192.168.1.28",
+        ip_input = arcade.gui.UIInputText(text="192.168.0.228",
                                           font_name=FONT_NAME,
                                           font_size=NORMAL_FONT_SIZE,
                                           width=INPUT_TEXT_WIDTH,
@@ -79,7 +79,7 @@ class ClientView(arcade.View):
                                                          int(port_input.text.strip()))
 
             try:
-                self.client_game_manager.session_initialization()
+                self.client_game_manager.initialize_session()
 
             # handle the case where the connection was not made
             except IOError as e:
@@ -122,7 +122,7 @@ class ClientView(arcade.View):
                 self.clear()
 
                 # Initialise the game
-                game_view = self.client_game_manager.game_initialization()
+                game_view = self.client_game_manager.initialize_game()
                 self.window.show_view(game_view)
 
     def on_key_press(self, key, modifiers):
