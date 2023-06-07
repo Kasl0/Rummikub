@@ -1,5 +1,5 @@
 import arcade
-from source.gui_game.game_constants import BOARD_WIDTH, BOARD_HEIGHT, GAP, RACK_HEIGHT
+from source.gui_views.game.game_constants import BOARD_WIDTH, BOARD_HEIGHT, GAP, RACK_HEIGHT
 
 # Screen title and size
 SCREEN_TITLE = "Rummikub"
@@ -12,6 +12,7 @@ FONT_NAME = "Kenney Future"
 
 TITLE_FONT_SIZE = 40
 NORMAL_FONT_SIZE = 20
+SMALL_FONT_SIZE = 10
 ERROR_FONT_SIZE = 15
 
 MAIN_COLOR = arcade.color.EERIE_BLACK       # for user non editable labels
