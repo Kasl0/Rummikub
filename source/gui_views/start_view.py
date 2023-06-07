@@ -1,3 +1,4 @@
+import arcade
 from arcade.gui import UIManager
 
 from source.gui_views.client_view import ClientView
@@ -9,7 +10,6 @@ class StartView(arcade.View):
     def __init__(self):
 
         super().__init__()
-        # self.app = arcade.Window
         self.manager = UIManager()
         self.manager.enable()
 
@@ -46,6 +46,10 @@ class StartView(arcade.View):
                 child=self.v_box)
         )
 
+        background_music = arcade.load_sound("source/sounds/nteleshede-16492.mp3")
+        self.background_music_player = background_music.play(loop=True)
+
+
     def __on_click_join(self, event):
         """
         Opens client screen.
@@ -59,6 +63,7 @@ class StartView(arcade.View):
         """
         Opens server screen.
         """
+        arcade.stop_sound(self.background_music_player)
         self.manager.disable()
         self.manager.clear()
         server_view = ServerLobbyView()
