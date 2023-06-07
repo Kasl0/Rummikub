@@ -10,8 +10,8 @@ from .game_constants import *
 from .game_rack import GameRack
 from .game_tile import GameTile
 
-from ..logic.vector2d import Vector2d
-from ..manager.client_actor import ClientActor, ClientActorState
+from source.logic.vector2d import Vector2d
+from source.manager.client_actor import ClientActor, ClientActorState
 
 
 class TakenFrom(Enum):
@@ -19,7 +19,7 @@ class TakenFrom(Enum):
     RACK = 2
 
 
-class Game(arcade.View):
+class GameView(arcade.View):
 
     def __init__(self, client_actor: ClientActor):
 
@@ -116,7 +116,7 @@ class Game(arcade.View):
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
 
-        # player can do nothing unless it's his turn
+        # Player can do nothing unless it's his turn
         if self.player.state != ClientActorState.ACTIVE:
             return
 

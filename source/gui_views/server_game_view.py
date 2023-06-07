@@ -14,7 +14,7 @@ class ServerGameView(arcade.View):
         self.manager = UIManager()
         self.manager.enable()
 
-        self.scroll_view = arcade.gui.UITextArea(text="Game has started\n", font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR, align="left", width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
+        self.scroll_view = arcade.gui.UITextArea(text="Game has started\n", font_size=SMALL_FONT_SIZE, text_color=MAIN_COLOR, align="left", width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
 
         self.manager.add(self.scroll_view.with_space_around(bottom=TINY_PADDING))
 

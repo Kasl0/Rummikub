@@ -4,7 +4,7 @@ from .tile import Color, Tile
 
 
 class TilePool:
-    """Pool of tiles which can be drawn by the player"""
+    """Pool of drawable tiles"""
 
     def __init__(self):
         self.__tiles = []
@@ -34,8 +34,8 @@ class TilePool:
 
     def draw_random_tile(self):
         """Draw a random tile from the pool.
-
-        Returns drawn tile or None if there's no more tiles in the pool"""
+        :return: drawn tile or None if there's no more tiles in the pool
+        """
 
         if len(self.__tiles) == 0:
             return None

@@ -6,10 +6,10 @@ from source.gui_views.view_constants import *
 
 
 class EndgameView(arcade.View):
-    def __init__(self, app, winner_nickname):
-
+    def __init__(self, winner_nickname):
         super().__init__()
-        self.app = app
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
 
         # Create a vertical BoxGroup to align buttons
         self.v_box = arcade.gui.UIBoxLayout()
@@ -43,7 +43,7 @@ class EndgameView(arcade.View):
         exit_button.on_click = self.__on_click_exit
 
         # Create a widget to hold the v_box widget, that will center the buttons
-        self.app.manager.add(
+        self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",

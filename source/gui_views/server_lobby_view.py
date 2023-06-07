@@ -22,9 +22,6 @@ class ServerLobbyView(arcade.View):
 
         self.server_game_manager: Optional[ServerGameManager] = None
 
-        # Boolean attribute that informs whether game has already started
-        self.started = False
-
         # Boolean attribute that informs whether error message is already displayed
         self.error_message = False
 
@@ -124,8 +121,6 @@ class ServerLobbyView(arcade.View):
                         self.error_message = True
                     return
 
-                self.started = True
-
                 # Clear the screen and draw label about started game
                 self.v_box.clear()
 
@@ -148,7 +143,7 @@ class ServerLobbyView(arcade.View):
         """
 
         # checking for incoming connections
-        if self.server_game_manager and not self.started:
+        if self.server_game_manager:
             return_value = self.server_game_manager.server.check_for_incoming_connections()
 
             # if new connection was made
@@ -171,17 +166,6 @@ class ServerLobbyView(arcade.View):
                 client_username, client_address, assigned_client_id = return_value
                 new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
                 self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))
-
-        # performing main game part loop
-        if self.started:
-            received_message = self.server_game_manager.update_main_game()
-            if received_message:
-                # TODO: Implement better message displaying
-                # message_label = arcade.gui.widgets.UITextArea(text=received_message.__str__(),
-                #                                               font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR,
-                #                                               width=SCREEN_WIDTH * 0.8, height=SCREEN_HEIGHT * 0.25)
-                # self.v_box.add(message_label)
-                pass
 
     def __show_server_game_view(self):
         server_game_view = ServerGameView(self.server_game_manager)

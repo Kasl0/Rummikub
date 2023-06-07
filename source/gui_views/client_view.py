@@ -121,11 +121,6 @@ class ClientView(arcade.View):
             # if start message
             if return_value:
 
-                # TODO: Napewno potrzebne?
-                # Clear the screen
-                self.v_box.clear()
-                self.clear()
-
                 # Initialise the game
                 game_view = self.client_game_manager.initialize_game()
                 self.manager.disable()
