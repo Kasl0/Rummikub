@@ -82,7 +82,8 @@ class ServerActor:
     def __handle_draw_tile(self):
         self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
         drawn_tile = self.tile_pool.draw_random_tile()
-        self.__true_racks[self.active_player_id].add_tile(drawn_tile)
+        if drawn_tile:
+            self.__true_racks[self.active_player_id].add_tile(drawn_tile)
         self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.__true_racks[self.active_player_id]))
 
     def __handle_introduced_change(self, board_change: BoardChange):
