@@ -12,6 +12,8 @@ from .game_tile import GameTile
 
 from source.logic.vector2d import Vector2d
 from source.manager.client_actor import ClientActor, ClientActorState
+from ..endgame_view import EndgameView
+from ..server_lobby_view import ServerLobbyView
 
 
 class TakenFrom(Enum):
@@ -45,9 +47,9 @@ class GameView(arcade.View):
         self.held_tile_original_position = None
 
         self.display_everything()
+        self.timer = 50
 
     def display_everything(self):
-
         self.game_board.display(self.player.board)
         self.game_rack.display(self.player.rack)
         self.display_buttons()
@@ -109,9 +111,20 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time: float):
         super().on_update(delta_time)
+        # TODO: EndgameView doesn't work
+        # print(self.timer)
+        # self.timer -= 1
         if self.player.check_if_should_introduce_changes():
             self.game_board.display(self.player.board)
             self.display_label()
+            # if self.player.check_if_game_should_end():
+            #     endgame_view = EndgameView(self.player.winner_nickname)
+            #     self.window.show_view(endgame_view)
+        if self.timer == 0:
+            print("Endgame")
+            endgame_view = EndgameView("abc")
+            self.clear()
+            self.window.show_view(endgame_view)
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """

@@ -28,6 +28,7 @@ class ClientActor:
         self.rack = rack
         self.client = client
         self.state = ClientActorState.PASSIVE
+        self.winner_nickname: Optional[str] = None
 
         self.active_player_id: Optional[int] = None
         self.active_player_nick: str = ""
@@ -52,13 +53,15 @@ class ClientActor:
             self.__handle_next_turn(message)
 
         elif message.type == MessageType.GAME_ENDS:
-            # TODO: Implement some way to end the game
-            pass
+            self.winner_nickname = message.content
 
         else:
             raise ValueError("Received unexpected message: " + message.__str__())
 
         return True
+
+    def check_if_game_should_end(self):
+        return self.winner_nickname is not None
 
     ###################
     # ACTION HANDLERS #

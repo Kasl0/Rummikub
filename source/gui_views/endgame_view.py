@@ -1,7 +1,5 @@
 import arcade.gui
 
-from source.gui_views.client_view import ClientView
-from source.gui_views.server_lobby_view import ServerLobbyView
 from source.gui_views.view_constants import *
 
 
@@ -10,6 +8,8 @@ class EndgameView(arcade.View):
         super().__init__()
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
+
+        self.winner_nickname = winner_nickname
 
         # Create a vertical BoxGroup to align buttons
         self.v_box = arcade.gui.UIBoxLayout()
@@ -49,6 +49,14 @@ class EndgameView(arcade.View):
                 anchor_y="center_y",
                 child=self.v_box)
         )
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        super().on_key_press(symbol, modifiers)
+        print(symbol)
 
     def __on_click_exit(self, event):
         """
