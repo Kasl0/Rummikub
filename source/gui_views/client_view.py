@@ -1,4 +1,5 @@
-from typing import Union, Optional
+import re
+from typing import Optional
 
 from arcade.gui import UIManager
 from keyboard import press, release
@@ -23,8 +24,7 @@ class ClientView(arcade.View):
 
         self.client_game_manager: Optional[ClientGameManager] = None
 
-        # Boolean attribute that informs whether error message is already displayed or not
-        self.error_message = False
+        self.error_message: Optional[arcade.gui.UILabel] = None
 
         # Client username
         username_text = arcade.gui.UILabel(text="Your username", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
@@ -71,12 +71,19 @@ class ClientView(arcade.View):
         def __on_click_connect(event):
 
             # Get username, server IP and port
+            ipv4_regex = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
+            port_regex = re.compile(
+                r'\b(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])\b')
 
-            # TODO: Verify here whether the server IP is correct
-            #  (is string with correct structure: 4 numbers 0-255 and 3 dots between them, no spaces)
-            #  and if not draw error label
+            # If IP number incorrect, draw error label
+            if not ipv4_regex.match(ip_input.text.strip()):
+                self.show_error_label("Server IP incorrect")
+                return
 
-            # TODO: Verify here whether the server port is correct and if not draw error label
+            # If port number incorrect, draw error label
+            if not port_regex.match(port_input.text.strip()):
+                self.show_error_label("Server port incorrect")
+                return
 
             self.client_game_manager = ClientGameManager(username_input.text.strip(),
                                                          ip_input.text.strip(),
@@ -85,17 +92,10 @@ class ClientView(arcade.View):
             try:
                 self.client_game_manager.initialize_session()
 
-            # handle the case where the connection was not made
             except IOError as e:
 
                 # If connection was not made, draw error label
-                if not self.error_message:
-                    error_text = arcade.gui.UILabel(text="Connection error",
-                                                    font_name=FONT_NAME,
-                                                    font_size=ERROR_FONT_SIZE,
-                                                    text_color=ERROR_COLOR)
-                    self.v_box.add(error_text.with_space_around(bottom=TINY_PADDING))
-                    self.error_message = True
+                self.show_error_label("Connection error")
                 return
 
             # Clear the screen and draw label about waiting for game start
@@ -107,6 +107,17 @@ class ClientView(arcade.View):
                                               text_color=MAIN_COLOR,
                                               align="center")
             self.v_box.add(waiting_text.with_space_around(bottom=BIG_PADDING))
+
+    def show_error_label(self, error_content: str):
+        # Remove old error message if it exists
+        if self.error_message:
+            self.v_box.remove(self.error_message)
+
+        self.error_message = arcade.gui.UILabel(text=error_content,
+                                                font_name=FONT_NAME,
+                                                font_size=ERROR_FONT_SIZE,
+                                                text_color=ERROR_COLOR).with_space_around(bottom=TINY_PADDING)
+        self.v_box.add(self.error_message)
 
     def on_update(self, delta_time: float):
         """
@@ -120,7 +131,6 @@ class ClientView(arcade.View):
 
             # if start message
             if return_value:
-
                 # Initialise the game
                 game_view = self.client_game_manager.initialize_game()
                 self.manager.disable()
