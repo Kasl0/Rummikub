@@ -39,3 +39,6 @@ class ServerGameManager:
 	def update_main_game(self):
 		return self.server_actor.update_main_game()
 
+	def game_has_ended(self):
+		return self.server_actor.game_has_ended()
+

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from ..conection.message import MessageType
 from ..logic.board import Board
 from ..logic.rack import Rack

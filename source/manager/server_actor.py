@@ -33,11 +33,13 @@ class ServerActor:
         self.server = server
 
         self.active_player_id = 1
+        self.game_ended = False
 
     def start_next_turn(self):
         # if game should end
         if self.__temp_rack.is_empty():
-            return self.__end_main_game(self.active_player_id)
+            self.__end_main_game(self.active_player_id)
+            return
 
         # get next player
         self.active_player_id = self.server.clients.get_next_client_id(self.active_player_id)
@@ -50,10 +52,13 @@ class ServerActor:
 
     def update_main_game(self) -> Optional[Message]:
         """Check if there are any waiting Messages to handle"""
+        if self.game_has_ended():
+            return
+
         message = self.server.receive(self.active_player_id, blocking=False)
 
         if message is None:
-            return None
+            return
 
         if message.type == MessageType.DRAW_TILE:
             self.__handle_draw_tile()
@@ -141,16 +146,18 @@ class ServerActor:
         self.true_board = self.__temp_board
         self.__true_racks[self.active_player_id] = self.__temp_rack
 
-    # TODO: test game ending sequence
     def __end_main_game(self, client_id: int):
         winner_username = self.server.clients.get_username(client_id)
         self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
         self.server.close()
-        return winner_username
+        self.game_ended = True
 
     ##################################################
     # FOR INTERACTIONS WITH temporary BOARD AND RACK #
     ##################################################
+
+    def game_has_ended(self):
+        return self.game_ended
 
     def __place_tile_on_temporary_board(self, tile: Tile, position: Vector2d):
         """Place given tile on given position at the temporary board"""

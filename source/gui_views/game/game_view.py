@@ -132,7 +132,6 @@ class GameView(arcade.View):
         super().on_update(delta_time)
         if self.player.check_if_should_introduce_changes():
             self.game_board.display(self.player.board)
-            print("On_update)")
             self.display_error_label("")
             if self.player.check_if_game_should_end():
                 self.__set_endgame_view()

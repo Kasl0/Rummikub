@@ -26,6 +26,8 @@ class ServerGameView(arcade.View):
         received_message = self.server_game_manager.update_main_game()
         if received_message:
             self.scroll_view.text += received_message.__str__() + "\n"
+        if self.server_game_manager.game_has_ended():
+            arcade.exit()
 
     def on_draw(self):
         self.clear()
