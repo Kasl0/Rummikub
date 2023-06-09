@@ -1,5 +1,7 @@
 from enum import Enum
 
+MESSAGE_SIZE = 4096
+
 
 class MessageType(Enum):
 	# server message types

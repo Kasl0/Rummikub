@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Optional
 
 import arcade.gui
@@ -131,6 +132,7 @@ class ServerLobbyView(arcade.View):
 
                 # Start the game
                 self.server_game_manager.session_initialization()
+                sleep(1)  # TODO: Not very professional (but works)
                 self.server_game_manager.game_initialization()
 
                 self.__show_server_game_view()

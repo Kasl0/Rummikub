@@ -7,6 +7,9 @@ from pyautogui import typewrite
 from pyperclip import paste
 import arcade.gui
 
+from source.gui_views.game.game_view import GameView
+from source.logic.board import Board
+from source.manager.client_actor import ClientActor
 from source.manager.client_game_manager import ClientGameManager
 from source.gui_views.view_constants import *
 
@@ -125,17 +128,20 @@ class ClientView(arcade.View):
             Checks for incoming game start message
         """
 
-        # checking for game start message
         if self.client_game_manager:
-            return_value = self.client_game_manager.client.receive(blocking=False)
+            # checking if game has been initialized (waiting for server to allow it)
+            if not self.client_game_manager.check_if_should_initialize_game():
+                return
 
-            # if start message
-            if return_value:
-                # Initialise the game
-                game_view = self.client_game_manager.initialize_game()
-                self.manager.disable()
-                self.manager.clear()
-                self.window.show_view(game_view)
+            # start game
+            rack = self.client_game_manager.initialize_game()
+            self.__show_game_view(rack)
+
+    def __show_game_view(self, rack):
+        game_view = GameView(ClientActor(Board(), rack, self.client_game_manager.client))
+        self.manager.disable()
+        self.manager.clear()
+        self.window.show_view(game_view)
 
     def on_key_press(self, key, modifiers):
         """

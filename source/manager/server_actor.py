@@ -141,9 +141,11 @@ class ServerActor:
         self.true_board = self.__temp_board
         self.__true_racks[self.active_player_id] = self.__temp_rack
 
+    # TODO: test game ending sequence
     def __end_main_game(self, client_id: int):
         winner_username = self.server.clients.get_username(client_id)
         self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
+        self.server.close()
         return winner_username
 
     ##################################################

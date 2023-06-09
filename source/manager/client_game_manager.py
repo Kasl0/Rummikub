@@ -1,3 +1,6 @@
+from typing import Optional
+
+from ..conection.message import MessageType
 from ..logic.board import Board
 from ..logic.rack import Rack
 from ..conection.client import Client
@@ -10,21 +13,24 @@ class ClientGameManager:
 		# client - for communication with server
 		self.client = Client(username, ip, port)
 
-		# player's board and rack
-		self.board = Board()
-		self.rack = Rack()
-
 		self.winner = None
 
 	def initialize_session(self):
 		self.client.connect()
 
-	def initialize_game(self):
-		self.rack = self.client.receive(blocking=True).content
-		print("Rack from the server:", self.rack)
-		return GameView(ClientActor(self.board, self.rack, self.client))
+	def check_if_should_initialize_game(self) -> bool:
+		message = self.client.receive(blocking=False)
+		if not message:
+			return False
 
-	def end_game(self):
-		print("The winner is: " + str(self.winner))
-		self.client.close_connection()
-		pass
+		if message.type != MessageType.GAME_STARTS:
+			raise ValueError(f"Expected GAME_STARTS message, received {message.type}")
+
+		return True
+
+	def initialize_game(self) -> Rack:
+		message = self.client.receive(blocking=True)
+		if message.type != MessageType.TRUE_RACK:
+			raise ValueError(f"Expected TRUE_RACK message, received {message.type}")
+
+		return message.content
