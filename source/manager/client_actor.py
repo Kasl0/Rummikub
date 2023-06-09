@@ -155,7 +155,7 @@ class ClientActor:
     #####################
 
     def __receive_board_and_rack(self):
-        for _ in range(2):  # we will receive true board AND true rack
+        for _ in range(2):  # we will receive true board and true rack
             message = self.client.receive(blocking=True)
             if message.type == MessageType.TRUE_BOARD:
                 self.board = message.content
