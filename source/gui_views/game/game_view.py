@@ -1,24 +1,32 @@
 from enum import Enum
-from typing import List, Optional, Tuple
+from functools import wraps
+from typing import Optional
 
 import arcade.gui
 
 from .game_board import GameBoard
-from .game_button import GameButton
 from source.gui_views.view_constants import *
 from .game_constants import *
 from .game_rack import GameRack
 from .game_tile import GameTile
 
-from source.logic.vector2d import Vector2d
 from source.manager.client_actor import ClientActor, ClientActorState
 from ..endgame_view import EndgameView
-from ..server_lobby_view import ServerLobbyView
 
 
 class TakenFrom(Enum):
     BOARD = 1,
     RACK = 2
+
+
+def check_player_state(func):
+    @wraps(func)
+    def wrapper(self, event):
+        if self.player.state != ClientActorState.ACTIVE:
+            return
+        return func(self, event)
+
+    return wrapper
 
 
 class GameView(arcade.View):
@@ -28,15 +36,41 @@ class GameView(arcade.View):
         super().__init__()
         self.player = client_actor
 
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+
+        # Buttons
+        v_box = arcade.gui.UIBoxLayout()
+
+        available_height = RACK_HEIGHT + GAP
+        available_width = BOARD_WIDTH - RACK_WIDTH - 2 * GAP
+
+        confirm_button = arcade.gui.UIFlatButton(text="Confirm", width=available_width, height=available_height / 4,
+                                                 style=BUTTON_STYLE)
+        confirm_button.on_click = self.__on_click_confirm
+        v_box.add(confirm_button.with_space_around(bottom=available_height / 16))
+
+        draw_button = arcade.gui.UIFlatButton(text="Draw tile", width=available_width, height=available_height / 4,
+                                              style=BUTTON_STYLE)
+        draw_button.on_click = self.__on_click_draw
+        v_box.add(draw_button.with_space_around(bottom=available_height / 16))
+
+        revert_button = arcade.gui.UIFlatButton(text="Revert changes", width=available_width,
+                                                height=available_height / 4,
+                                                style=BUTTON_STYLE)
+        revert_button.on_click = self.__on_click_revert
+        v_box.add(revert_button.with_space_around(bottom=available_height / 16))
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="right",
+                align_x=-GAP,
+                anchor_y="bottom",
+                child=v_box)
+        )
         # Gui elements
         self.game_board = GameBoard()
         self.game_rack = GameRack()
-        self.UI = arcade.SpriteList()
-
-        # Buttons
-        self.confirm_button: Optional[GameButton] = None
-        self.draw_button: Optional[GameButton] = None
-        self.revert_button: Optional[GameButton] = None
 
         # UI messages and texts
         self.error_message: str = ""
@@ -52,7 +86,7 @@ class GameView(arcade.View):
     def display_everything(self):
         self.game_board.display(self.player.board)
         self.game_rack.display(self.player.rack)
-        self.display_buttons()
+        # self.display_buttons()
         self.display_label()
 
     def display_label(self):
@@ -68,26 +102,6 @@ class GameView(arcade.View):
                         start_y=RACK_HEIGHT + GAP / 2, anchor_x="center", anchor_y="center", font_name=FONT_NAME,
                         font_size=NORMAL_FONT_SIZE, color=MAIN_COLOR).draw()
 
-    def display_buttons(self):
-
-        button_width = 200
-        self.confirm_button = GameButton(RACK_WIDTH + GAP + button_width / 2,
-                                         RACK_HEIGHT * 5 / 5,
-                                         button_width,
-                                         RACK_HEIGHT * 1 / 4,
-                                         "Confirm")
-        self.draw_button = GameButton(RACK_WIDTH + GAP + button_width / 2,
-                                      RACK_HEIGHT * 3 / 5,
-                                      button_width,
-                                      RACK_HEIGHT * 1 / 4,
-                                      "Draw tile")
-
-        self.revert_button = GameButton(RACK_WIDTH + GAP + button_width / 2,
-                                        RACK_HEIGHT * 1 / 5,
-                                        button_width,
-                                        RACK_HEIGHT * 1 / 4,
-                                        "Revert changes")
-
     def draw_confirm_error(self, row, column_sequence_start, column_sequence_end, error_message):
         self.error_message = error_message
         self.game_board.mark_wrong_placed(row, column_sequence_start, column_sequence_end)
@@ -98,9 +112,7 @@ class GameView(arcade.View):
         self.game_board.on_draw()
         self.game_rack.on_draw()
 
-        self.confirm_button.draw()
-        self.draw_button.draw()
-        self.revert_button.draw()
+        self.manager.draw()
 
         self.display_label()
 
@@ -121,10 +133,15 @@ class GameView(arcade.View):
             #     endgame_view = EndgameView(self.player.winner_nickname)
             #     self.window.show_view(endgame_view)
         if self.timer == 0:
-            print("Endgame")
-            endgame_view = EndgameView("abc")
-            self.clear()
-            self.window.show_view(endgame_view)
+            self.__set_endgame_view()
+
+    def __set_endgame_view(self):
+        print("Endgame")
+        endgame_view = EndgameView("abc")
+        self.manager.disable()
+        self.manager.clear()
+        self.clear()
+        self.window.show_view(endgame_view)
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
@@ -252,34 +269,33 @@ class GameView(arcade.View):
             self.held_tile_taken_from = None
             self.held_tile = None
 
-        # Check if the mouse is on confirm button
-        elif self.confirm_button.is_mouse_on_button(x, y):
+    @check_player_state
+    def __on_click_revert(self, event):
+        self.error_message = ""
+        self.game_board.unmark_all_tiles_as_new()
+        self.player.handle_revert_changes()
+        self.display_everything()
 
-            if self.game_board.is_any_tile_new():
+    @check_player_state
+    def __on_click_draw(self, event):
+        self.error_message = ""
+        self.game_board.unmark_all_tiles_as_new()
+        self.player.handle_draw_tile()
+        self.display_everything()
 
-                verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
-                if verification_result:
-                    self.error_message = ""
-                    self.game_board.unmark_all_tiles_as_new()
-                else:
-                    self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
+    @check_player_state
+    def __on_click_confirm(self, event):
+        if self.game_board.is_any_tile_new():
 
+            verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
+            if verification_result:
+                self.error_message = ""
+                self.game_board.unmark_all_tiles_as_new()
             else:
-                self.error_message = "You need to place at least one tile"
+                self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
 
-        # Check if the mouse is on draw button
-        elif self.draw_button.is_mouse_on_button(x, y):
-            self.error_message = ""
-            self.game_board.unmark_all_tiles_as_new()
-            self.player.handle_draw_tile()
-            self.display_everything()
-
-        # Check if the mouse is on revert button
-        elif self.revert_button.is_mouse_on_button(x, y):
-            self.error_message = ""
-            self.game_board.unmark_all_tiles_as_new()
-            self.player.handle_revert_changes()
-            self.display_everything()
+        else:
+            self.error_message = "You need to place at least one tile"
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """
