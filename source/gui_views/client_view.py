@@ -39,7 +39,7 @@ class ClientView(arcade.View):
         # Server IP
         ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR)
         self.v_box.add(ip_text.with_space_around(bottom=TINY_PADDING))
-        ip_input = arcade.gui.UIInputText(text="192.168.0.228",
+        ip_input = arcade.gui.UIInputText(text="192.168.1.29",
                                           font_name=FONT_NAME,
                                           font_size=NORMAL_FONT_SIZE,
                                           width=INPUT_TEXT_WIDTH,

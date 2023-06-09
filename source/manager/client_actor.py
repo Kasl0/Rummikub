@@ -88,10 +88,12 @@ class ClientActor:
         else:
             raise ValueError("Received unexpected board change type: " + board_change.change_type.__str__())
 
+    @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_draw_tile(self):
         """Ask server for a tile and add it to the rack"""
         self.client.send(Message(MessageType.DRAW_TILE, None))
-        self.__receive_board_and_rack_and_next_turn()
+        self.__receive_board_and_rack()
+        self.state = ClientActorState.PASSIVE
 
     @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_board_change_place(self, tile: Tile, position: Vector2d):
@@ -159,18 +161,6 @@ class ClientActor:
                 self.board = message.content
             elif message.type == MessageType.TRUE_RACK:
                 self.rack = message.content
-            else:
-                raise ValueError("Received unexpected message: " + message.__str__())
-
-    def __receive_board_and_rack_and_next_turn(self):
-        for _ in range(3):  # we will receive true board AND true rack AND next_turn message
-            message = self.client.receive(blocking=True)
-            if message.type == MessageType.TRUE_BOARD:
-                self.board = message.content
-            elif message.type == MessageType.TRUE_RACK:
-                self.rack = message.content
-            elif message.type == MessageType.NEXT_TURN:
-                self.__handle_next_turn(message)
             else:
                 raise ValueError("Received unexpected message: " + message.__str__())
 

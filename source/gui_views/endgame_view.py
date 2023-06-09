@@ -23,17 +23,17 @@ class EndgameView(arcade.View):
         self.v_box.add(title.with_space_around(bottom=BIG_PADDING))
 
         winner_label1 = arcade.gui.UILabel(text="The winner is:",
-                                   align="center",
-                                   font_size=NORMAL_FONT_SIZE,
-                                   font_name=FONT_NAME,
-                                   text_color=MAIN_COLOR)
+                                           align="center",
+                                           font_size=NORMAL_FONT_SIZE,
+                                           font_name=FONT_NAME,
+                                           text_color=MAIN_COLOR)
         self.v_box.add(winner_label1.with_space_around(bottom=BIG_PADDING))
 
         winner_label2 = arcade.gui.UILabel(text=winner_nickname,
-                                          align="center",
-                                          font_size=TITLE_FONT_SIZE,
-                                          font_name=FONT_NAME,
-                                          text_color=MAIN_COLOR)
+                                           align="center",
+                                           font_size=TITLE_FONT_SIZE,
+                                           font_name=FONT_NAME,
+                                           text_color=MAIN_COLOR)
         self.v_box.add(winner_label2.with_space_around(bottom=BIG_PADDING))
 
         # Create the button

@@ -19,6 +19,16 @@ class TakenFrom(Enum):
     RACK = 2
 
 
+common_label_style = {
+    "x": 0,
+    "y": RACK_HEIGHT + GAP / 4,
+    "width": RACK_WIDTH,
+    "align": "center",
+    "font_name": FONT_NAME,
+    "font_size": NORMAL_FONT_SIZE
+}
+
+
 def assert_player_is_active(func):
     @wraps(func)
     def wrapper(self, event):
@@ -68,12 +78,14 @@ class GameView(arcade.View):
                 anchor_y="bottom",
                 child=v_box)
         )
+
         # Gui elements
         self.game_board = GameBoard()
         self.game_rack = GameRack()
 
         # UI messages and texts
-        self.error_message: str = ""
+        self.message_label = arcade.gui.UILabel()
+        self.manager.add(self.message_label)
 
         # Held tile
         self.held_tile: Optional[GameTile] = None
@@ -86,24 +98,24 @@ class GameView(arcade.View):
     def display_everything(self):
         self.game_board.display(self.player.board)
         self.game_rack.display(self.player.rack)
-        # self.display_buttons()
-        self.display_label()
 
-    def display_label(self):
-        # Display label for error messages
-        if self.error_message:
-            arcade.Text(text=self.error_message, start_x=RACK_WIDTH / 2, start_y=RACK_HEIGHT + GAP / 2,
-                        anchor_x="center", anchor_y="center", font_name=FONT_NAME, font_size=ERROR_FONT_SIZE,
-                        color=ERROR_COLOR).draw()
+    # Displays error label. If error_text is falsy then display current player's nickname
+    def display_error_label(self, error_text: Optional[str]):
+        self.manager.remove(self.message_label)
+
+        if error_text:
+            self.message_label = arcade.gui.UILabel(text=error_text,
+                                                    text_color=ERROR_COLOR, **common_label_style)
+            self.manager.add(self.message_label)
 
         # Display active player nick
         else:
-            arcade.Text(text="Current player: " + self.player.active_player_nick, start_x=RACK_WIDTH / 2,
-                        start_y=RACK_HEIGHT + GAP / 2, anchor_x="center", anchor_y="center", font_name=FONT_NAME,
-                        font_size=NORMAL_FONT_SIZE, color=MAIN_COLOR).draw()
+            self.message_label = arcade.gui.UILabel(text="Current player: " + self.player.active_player_nick,
+                                                    text_color=MAIN_COLOR, **common_label_style)
+            self.manager.add(self.message_label)
 
     def draw_confirm_error(self, row, column_sequence_start, column_sequence_end, error_message):
-        self.error_message = error_message
+        self.display_error_label(error_message)
         self.game_board.mark_wrong_placed(row, column_sequence_start, column_sequence_end)
 
     def on_draw(self):
@@ -113,8 +125,6 @@ class GameView(arcade.View):
         self.game_rack.on_draw()
 
         self.manager.draw()
-
-        self.display_label()
 
         if self.held_tile:
             self.held_tile.draw()
@@ -128,7 +138,8 @@ class GameView(arcade.View):
         # self.timer -= 1
         if self.player.check_if_should_introduce_changes():
             self.game_board.display(self.player.board)
-            self.display_label()
+            print("On_update)")
+            self.display_error_label("")
             # if self.player.check_if_game_should_end():
             #     endgame_view = EndgameView(self.player.winner_nickname)
             #     self.window.show_view(endgame_view)
@@ -206,7 +217,7 @@ class GameView(arcade.View):
                         self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
                         self.held_tile.y = SCREEN_HEIGHT - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
                         self.game_board.add_game_tile(self.held_tile)
-                        self.error_message = ""
+                        self.display_error_label("")
                     else:
                         return_to_original = True
 
@@ -238,9 +249,9 @@ class GameView(arcade.View):
                                 self.held_tile.x = MAT_WIDTH * end_position.x + MAT_WIDTH / 2
                                 self.held_tile.y = RACK_HEIGHT - (MAT_HEIGHT * end_position.y + MAT_HEIGHT / 2)
                                 self.game_rack.add_game_tile(self.held_tile)
-                                self.error_message = ""
+                                self.display_error_label("")
                             else:
-                                self.error_message = "You cannot take tile from board that is not yours"
+                                self.display_error_label("You cannot take tile from board that is not yours")
                                 return_to_original = True
                         else:
                             return_to_original = True
@@ -271,14 +282,14 @@ class GameView(arcade.View):
 
     @assert_player_is_active
     def __on_click_revert(self, event):
-        self.error_message = ""
+        self.display_error_label("")
         self.game_board.unmark_all_tiles_as_new()
         self.player.handle_revert_changes()
         self.display_everything()
 
     @assert_player_is_active
     def __on_click_draw(self, event):
-        self.error_message = ""
+        self.display_error_label("")
         self.game_board.unmark_all_tiles_as_new()
         self.player.handle_draw_tile()
         self.display_everything()
@@ -289,13 +300,13 @@ class GameView(arcade.View):
 
             verification_result, row, column_sequence_start, column_sequence_end, error_message = self.player.handle_confirm_changes()
             if verification_result:
-                self.error_message = ""
+                self.display_error_label("")
                 self.game_board.unmark_all_tiles_as_new()
             else:
                 self.draw_confirm_error(row, column_sequence_start, column_sequence_end, error_message)
 
         else:
-            self.error_message = "You need to place at least one tile"
+            self.display_error_label("You need to place at least one tile")
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """
