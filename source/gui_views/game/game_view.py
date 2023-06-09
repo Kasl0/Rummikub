@@ -93,7 +93,6 @@ class GameView(arcade.View):
         self.held_tile_original_position = None
 
         self.display_everything()
-        self.timer = 50
 
     def display_everything(self):
         self.game_board.display(self.player.board)
@@ -119,7 +118,7 @@ class GameView(arcade.View):
         self.game_board.mark_wrong_placed(row, column_sequence_start, column_sequence_end)
 
     def on_draw(self):
-        arcade.start_render()
+        self.clear()
 
         self.game_board.on_draw()
         self.game_rack.on_draw()
@@ -129,25 +128,16 @@ class GameView(arcade.View):
         if self.held_tile:
             self.held_tile.draw()
 
-        arcade.finish_render()
-
     def on_update(self, delta_time: float):
         super().on_update(delta_time)
-        # TODO: EndgameView doesn't work
-        # print(self.timer)
-        # self.timer -= 1
         if self.player.check_if_should_introduce_changes():
             self.game_board.display(self.player.board)
             print("On_update)")
             self.display_error_label("")
-            # if self.player.check_if_game_should_end():
-            #     endgame_view = EndgameView(self.player.winner_nickname)
-            #     self.window.show_view(endgame_view)
-        if self.timer == 0:
-            self.__set_endgame_view()
+            if self.player.check_if_game_should_end():
+                self.__set_endgame_view()
 
     def __set_endgame_view(self):
-        print("Endgame")
         endgame_view = EndgameView("abc")
         self.manager.disable()
         self.manager.clear()
