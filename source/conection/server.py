@@ -1,9 +1,8 @@
 import socket
-import msvcrt
 import pickle
 from typing import Optional
 
-from .message import Message, MessageType
+from .message import Message, MessageType, MESSAGE_SIZE
 from .server_info_aggregator import ServerInfoAggregator
 
 
@@ -45,8 +44,8 @@ class Server:
 
         # Receive client's username
         client_socket.settimeout(5)
-        # client_socket.recv(1024).decode()
-        message = pickle.loads(client_socket.recv(1024))
+        message = pickle.loads(client_socket.recv(MESSAGE_SIZE))
+        print("Received:")
         print(message)
         client_username = message.content
         client_socket.settimeout(None)
@@ -72,7 +71,8 @@ class Server:
         print("Closed all connections and socket")
 
     def send(self, client_id, message: Message):
-        print("Sent:\n" + message.__str__())
+        print("Sent:")
+        print(message)
         self.clients.get_socket(client_id).sendall(pickle.dumps(message))
 
     def send_all(self, message: Message):
@@ -92,9 +92,10 @@ class Server:
         self.clients.get_socket(client_id).setblocking(blocking)
 
         try:
-            received_msg = self.clients.get_socket(client_id).recv(2048)
+            received_msg = self.clients.get_socket(client_id).recv(MESSAGE_SIZE)
             if received_msg:
                 message = pickle.loads(received_msg)
+                print("Received:")
                 print(message)
                 return message
             else:

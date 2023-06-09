@@ -33,11 +33,13 @@ class ServerActor:
         self.server = server
 
         self.active_player_id = 1
+        self.game_ended = False
 
     def start_next_turn(self):
         # if game should end
         if self.__temp_rack.is_empty():
-            return self.__end_main_game(self.active_player_id)
+            self.__end_main_game(self.active_player_id)
+            return
 
         # get next player
         self.active_player_id = self.server.clients.get_next_client_id(self.active_player_id)
@@ -50,10 +52,13 @@ class ServerActor:
 
     def update_main_game(self) -> Optional[Message]:
         """Check if there are any waiting Messages to handle"""
+        if self.game_has_ended():
+            return
+
         message = self.server.receive(self.active_player_id, blocking=False)
 
         if message is None:
-            return None
+            return
 
         if message.type == MessageType.DRAW_TILE:
             self.__handle_draw_tile()
@@ -82,7 +87,8 @@ class ServerActor:
     def __handle_draw_tile(self):
         self.server.send_all(Message(MessageType.TRUE_BOARD, self.true_board))
         drawn_tile = self.tile_pool.draw_random_tile()
-        self.__true_racks[self.active_player_id].add_tile(drawn_tile)
+        if drawn_tile:
+            self.__true_racks[self.active_player_id].add_tile(drawn_tile)
         self.server.send(self.active_player_id, Message(MessageType.TRUE_RACK, self.__true_racks[self.active_player_id]))
 
     def __handle_introduced_change(self, board_change: BoardChange):
@@ -130,8 +136,7 @@ class ServerActor:
 
     def __announce_next_turn(self):
         # TODO: Not very professional, but otherwise active player won't get NEXT_TURN message
-        #  and I have no idea why it's like that. I even created separate method __receive_board_and_rack_and_next_turn
-        #  in ClientActor but to no avail
+        #  and I have no idea why it's like that
         sleep(1)
         message_content = (self.active_player_id, self.server.clients.get_username(self.active_player_id))
         self.server.send_all(Message(MessageType.NEXT_TURN, message_content))
@@ -143,11 +148,15 @@ class ServerActor:
     def __end_main_game(self, client_id: int):
         winner_username = self.server.clients.get_username(client_id)
         self.server.send_all(Message(MessageType.GAME_ENDS, winner_username))
-        return winner_username
+        self.server.close()
+        self.game_ended = True
 
     ##################################################
     # FOR INTERACTIONS WITH temporary BOARD AND RACK #
     ##################################################
+
+    def game_has_ended(self):
+        return self.game_ended
 
     def __place_tile_on_temporary_board(self, tile: Tile, position: Vector2d):
         """Place given tile on given position at the temporary board"""

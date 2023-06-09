@@ -1,8 +1,9 @@
+from ..conection.message import MessageType
 from ..logic.board import Board
 from ..logic.rack import Rack
 from ..conection.client import Client
 from .client_actor import ClientActor
-from ..gui_game.game import Game
+from source.gui_views.game.game_view import GameView
 
 
 class ClientGameManager:
@@ -10,49 +11,24 @@ class ClientGameManager:
 		# client - for communication with server
 		self.client = Client(username, ip, port)
 
-		# player's board and rack
-		self.board = Board()
-		self.rack = Rack()
-
 		self.winner = None
 
-	"""def play(self):
-		"Go through all game stages:\n
-				1. join server,\n
-				2. receive starting tiles,\n
-				3. play main game part,\n
-				4. end game sequence + disconnect from server"
-
-		print("Connecting with server")
-		self.session_initialization()
-		print("Success")
-
-		print("Receive starting tiles from the server")
-		self.game_initialization()
-		print("All tiles received")
-
-		print("Main game part starts!")
-		self.main_game()
-		# print("We have a winner")
-
-		print("Closing connection with server")
-		self.end_game()
-
-		return"""
-
-	def session_initialization(self):
+	def initialize_session(self):
 		self.client.connect()
 
-	def game_initialization(self):
-		self.rack = self.client.receive(blocking=True).content
-		print("Rack from the server:", self.rack)
-		return Game(ClientActor(self.board, self.rack, self.client))
+	def check_if_should_initialize_game(self) -> bool:
+		message = self.client.receive(blocking=False)
+		if not message:
+			return False
 
-	"""def main_game(self):
-		player = ClientActor(self.board, self.rack, self.client)
-		# self.winner = player.play_main_game_part()  # from now on object of class Player plays the main part of game"""
+		if message.type != MessageType.GAME_STARTS:
+			raise ValueError(f"Expected GAME_STARTS message, received {message.type}")
 
-	def end_game(self):
-		print("The winner is: " + str(self.winner))
-		self.client.close_connection()
-		pass
+		return True
+
+	def initialize_game(self) -> Rack:
+		message = self.client.receive(blocking=True)
+		if message.type != MessageType.TRUE_RACK:
+			raise ValueError(f"Expected TRUE_RACK message, received {message.type}")
+
+		return message.content

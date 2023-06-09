@@ -4,8 +4,8 @@ import arcade.gui
 
 from .game_constants import *
 from .game_tile import GameTile
-from ..gui_views.view_constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from ..logic.vector2d import Vector2d
+from source.gui_views.view_constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from source.logic.vector2d import Vector2d
 
 
 class GameRack:

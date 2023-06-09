@@ -1,8 +1,8 @@
 import pickle
 import socket
-from typing import Union, Optional
+from typing import Optional
 
-from .message import Message, MessageType
+from .message import Message, MessageType, MESSAGE_SIZE
 
 
 class Client:
@@ -16,15 +16,12 @@ class Client:
 
         # client's username
         self._username = username
-        # self.username = "Jan"
 
         # server's ip
         self._ip = ip
-        # self.ip = "192.168.0.228"
 
         # server's port
         self._port = port
-        # self.port = 1234
 
     def connect(self, timeout=5):
         """
@@ -53,6 +50,8 @@ class Client:
         """Sends message to the server."""
 
         if self._s and self._s.fileno() != -1:
+            print("Sent:")
+            print(message)
             self._s.sendall(pickle.dumps(message))
         else:
             print("Not connected to server.")
@@ -67,9 +66,10 @@ class Client:
         try:
 
             if self._s.fileno() != -1:
-                received_msg = self._s.recv(2048)
+                received_msg = self._s.recv(MESSAGE_SIZE)
                 if received_msg:
                     message = pickle.loads(received_msg)
+                    print("Received:")
                     print(message)
                     return message
                 else:

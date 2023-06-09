@@ -1,26 +1,27 @@
+from time import sleep
 from typing import Optional
 
 import arcade.gui
 from pyperclip import copy
 
+from source.gui_views.server_game_view import ServerGameView
 from source.manager.server_game_manager import ServerGameManager
 from source.conection.server import get_server_ip
 from source.gui_views.view_constants import *
 
 
-class ServerView(arcade.View):
+class ServerLobbyView(arcade.View):
 
-    def __init__(self, app):
+    def __init__(self):
 
         super().__init__()
-        self.app = app
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+
         self.v_box = arcade.gui.UIBoxLayout()
         self.v_box.align = "left"
 
         self.server_game_manager: Optional[ServerGameManager] = None
-
-        # Boolean attribute that informs whether game has already started
-        self.started = False
 
         # Boolean attribute that informs whether error message is already displayed
         self.error_message = False
@@ -41,7 +42,7 @@ class ServerView(arcade.View):
         start_button = arcade.gui.UIFlatButton(text="Start", width=BUTTON_WIDTH, style=BUTTON_STYLE)
         self.v_box.add(start_button.with_space_around(bottom=NORMAL_PADDING))
 
-        self.app.manager.add(
+        self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
@@ -121,22 +122,21 @@ class ServerView(arcade.View):
                         self.error_message = True
                     return
 
-                self.started = True
-
                 # Clear the screen and draw label about started game
                 self.v_box.clear()
 
                 started_text = arcade.gui.UILabel(text="Game has started", font_name=FONT_NAME, font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR, align="center")
                 self.v_box.add(started_text.with_space_around(bottom=TINY_PADDING))
 
-                self.app.on_draw()
+                self.on_draw()
 
                 # Start the game
                 self.server_game_manager.session_initialization()
+                sleep(1)  # TODO: Not very professional (but works)
                 self.server_game_manager.game_initialization()
-                # TODO: This method executes in an infinite loop and blocks gui.
-                #  Possible solution: self.on_update executes every frame. Maybe try executing fragment of play() code in each frame.
-                #  We need to remove infinitive loops.
+
+                self.__show_server_game_view()
+
 
     def on_update(self, delta_time: float):
         """
@@ -145,7 +145,7 @@ class ServerView(arcade.View):
         """
 
         # checking for incoming connections
-        if self.server_game_manager and not self.started:
+        if self.server_game_manager:
             return_value = self.server_game_manager.server.check_for_incoming_connections()
 
             # if new connection was made
@@ -169,13 +169,12 @@ class ServerView(arcade.View):
                 new_client_text = arcade.gui.UILabel(text=client_username, font_name=FONT_NAME, text_color=MAIN_COLOR, font_size=NORMAL_FONT_SIZE)
                 self.v_box.add(new_client_text.with_space_around(bottom=SMALL_PADDING))
 
-        # performing main game part loop
-        if self.started:
-            received_message = self.server_game_manager.update_main_game()
-            if received_message:
-                # TODO: Implement better message displaying
-                # message_label = arcade.gui.widgets.UITextArea(text=received_message.__str__(),
-                #                                               font_size=NORMAL_FONT_SIZE, text_color=MAIN_COLOR,
-                #                                               width=SCREEN_WIDTH * 0.8, height=SCREEN_HEIGHT * 0.25)
-                # self.v_box.add(message_label)
-                pass
+    def __show_server_game_view(self):
+        server_game_view = ServerGameView(self.server_game_manager)
+        self.manager.disable()
+        self.manager.clear()
+        self.window.show_view(server_game_view)
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
