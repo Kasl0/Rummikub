@@ -38,7 +38,7 @@ class StartView(arcade.View):
         host_button.on_click = self.__on_click_host
         exit_button.on_click = self.__on_click_exit
 
-        # Create a widget to hold the v_box widget, that will center the buttons
+        # Create a widget to hold the v_box which will center the buttons
         self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",

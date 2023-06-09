@@ -15,6 +15,16 @@ class ClientActorState(Enum):
     PASSIVE = 2
 
 
+def assert_client_actor_has_state(client_state: ClientActorState):
+    def decorator(func):
+        def wrapper(self, *args, **kwargs):
+            if self.state != client_state:
+                return
+            return func(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
 class ClientActor:
     """Represents the player
 
@@ -33,10 +43,8 @@ class ClientActor:
         self.active_player_id: Optional[int] = None
         self.active_player_nick: str = ""
 
+    @assert_client_actor_has_state(ClientActorState.PASSIVE)
     def check_if_should_introduce_changes(self) -> bool:
-        if not self.state.PASSIVE:
-            return False
-
         # here we receive messages and react adequately
         message = self.client.receive(blocking=False)
 
@@ -85,10 +93,8 @@ class ClientActor:
         self.client.send(Message(MessageType.DRAW_TILE, None))
         self.__receive_board_and_rack_and_next_turn()
 
+    @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_board_change_place(self, tile: Tile, position: Vector2d):
-        if self.state != ClientActorState.ACTIVE:
-            return
-
         if self.rack.if_tile_on_rack(tile):
             # introduce change on your own board and rack
             self.__place_tile(tile, position, remove_from_rack=True)
@@ -100,10 +106,8 @@ class ClientActor:
         else:
             print("Failed to place tile: " + tile.__str__() + ", player doesn't have on their rack")
 
+    @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_board_change_move(self, source_position: Vector2d, destined_position: Vector2d):
-        if self.state != ClientActorState.ACTIVE:
-            return
-
         # introduce change on your own board
         self.board.move_tile(source_position, destined_position)
 
@@ -111,10 +115,8 @@ class ClientActor:
         board_change = BoardChange(BoardChangeType.MOVE, None, source_position, destined_position)
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
+    @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_board_change_remove(self, position: Vector2d):
-        if self.state != ClientActorState.ACTIVE:
-            return
-
         # introduce change on your own board and rack
         self.__take_tile_off_board(position, add_to_rack=True)
 
@@ -123,17 +125,13 @@ class ClientActor:
 
         self.client.send(Message(MessageType.CHANGE_INTRODUCED, board_change))
 
+    @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_revert_changes(self):
-        if self.state != ClientActorState.ACTIVE:
-            return
-
         self.client.send(Message(MessageType.REVERT_CHANGES, None))
         self.__receive_board_and_rack()
 
+    @assert_client_actor_has_state(ClientActorState.ACTIVE)
     def handle_confirm_changes(self):
-        if self.state != ClientActorState.ACTIVE:
-            return
-
         self.client.send(Message(MessageType.CONFIRM_CHANGES, None))
         message = self.client.receive(blocking=True)
 
@@ -175,7 +173,6 @@ class ClientActor:
                 self.__handle_next_turn(message)
             else:
                 raise ValueError("Received unexpected message: " + message.__str__())
-
 
     ########################################
     # FOR INTERACTIONS WITH BOARD AND RACK #

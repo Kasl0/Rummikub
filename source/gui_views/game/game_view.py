@@ -19,7 +19,7 @@ class TakenFrom(Enum):
     RACK = 2
 
 
-def check_player_state(func):
+def assert_player_is_active(func):
     @wraps(func)
     def wrapper(self, event):
         if self.player.state != ClientActorState.ACTIVE:
@@ -269,21 +269,21 @@ class GameView(arcade.View):
             self.held_tile_taken_from = None
             self.held_tile = None
 
-    @check_player_state
+    @assert_player_is_active
     def __on_click_revert(self, event):
         self.error_message = ""
         self.game_board.unmark_all_tiles_as_new()
         self.player.handle_revert_changes()
         self.display_everything()
 
-    @check_player_state
+    @assert_player_is_active
     def __on_click_draw(self, event):
         self.error_message = ""
         self.game_board.unmark_all_tiles_as_new()
         self.player.handle_draw_tile()
         self.display_everything()
 
-    @check_player_state
+    @assert_player_is_active
     def __on_click_confirm(self, event):
         if self.game_board.is_any_tile_new():
 
