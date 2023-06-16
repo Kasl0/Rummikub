@@ -46,7 +46,7 @@ class StartView(arcade.View):
                 child=self.v_box)
         )
 
-        background_music = arcade.load_sound("source/sounds/nteleshede-16492.mp3")
+        background_music = arcade.load_sound("resources/sounds/nteleshede-16492.mp3")
         self.background_music_player = background_music.play(loop=True)
 
 

@@ -1,3 +1,4 @@
+import re
 from time import sleep
 from typing import Optional
 
@@ -23,8 +24,7 @@ class ServerLobbyView(arcade.View):
 
         self.server_game_manager: Optional[ServerGameManager] = None
 
-        # Boolean attribute that informs whether error message is already displayed
-        self.error_message = False
+        self.error_message: Optional[arcade.gui.UILabel] = None
 
         # Server IP
         ip_text = arcade.gui.UILabel(text="The server IP", font_name=FONT_NAME, text_color=CONTRAST_COLOR, width=COPY_BUTTON_GAP)
@@ -54,12 +54,19 @@ class ServerLobbyView(arcade.View):
 
             # TODO: Verify here whether the server port is correct and if not draw error label
 
-            # Get port number
-            port_number = int(port_input.text)
+            port_regex = re.compile(
+                r'\b(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])\b')
 
+            # If port number incorrect, draw error label
+            if not port_regex.match(port_input.text.strip()):
+                self.show_error_label("Server port incorrect")
+                return
+
+            port_number = int(port_input.text.strip())
             self.server_game_manager = ServerGameManager(port_number)
 
             self.v_box.clear()
+            self.error_message = False
 
             # Server IP
             ip_h_box = arcade.gui.UIBoxLayout(vertical=False)
@@ -137,6 +144,16 @@ class ServerLobbyView(arcade.View):
 
                 self.__show_server_game_view()
 
+    def show_error_label(self, error_content: str):
+        # Remove old error message if it exists
+        if self.error_message:
+            self.v_box.remove(self.error_message)
+
+        self.error_message = arcade.gui.UILabel(text=error_content,
+                                                font_name=FONT_NAME,
+                                                font_size=ERROR_FONT_SIZE,
+                                                text_color=ERROR_COLOR).with_space_around(bottom=TINY_PADDING)
+        self.v_box.add(self.error_message)
 
     def on_update(self, delta_time: float):
         """
